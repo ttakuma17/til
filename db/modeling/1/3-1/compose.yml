@@ -7,6 +7,7 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
+      PGTZ: Asia/Tokyo
     ports:
       - "5433:5432"
     volumes:
