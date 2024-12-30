@@ -28,14 +28,17 @@ VALUES
 INSERT INTO Orders (paid, payment_total, customer_id)
 VALUES
     (true, 4300, 1),
-    (false, 1640, 2);
+    (false, 11880, 2);
 
 INSERT INTO OrderDetails (quantity, subtotal, tax, order_id, product_id, campaign_id)
 VALUES
     (10, 1000 ,8, 1, 1, 1),
     (15, 3300, 8, 1, 5, 1),
-    (2, 360, 8, 2, 7, 1),
-    (1, 1280 ,8, 2, 13, 1);
+    (9, 5400, 8, 2, 10, 2),
+    (5, 5400, 8, 2, 10, 1),
+    (7, 3640, 8, 2, 9, 2),
+    (4, 1560, 8, 2, 6, 2),
+    (1, 1280 ,8, 2, 13, 2);
 
 INSERT INTO Options (name, value)
 VALUES
@@ -46,13 +49,14 @@ VALUES
 
 INSERT INTO OrderDetailsOptions (order_details_id, option_id)
 VALUES
-    (1280, 1);
+    (1, 1), (2,2);
 
 INSERT INTO OrderDetailsOptions (order_details_id, option_id)
 VALUES
     (1, 2),
-    (2, 4);
+    (4, 2);
 
 INSERT INTO Campaign (name, discount_rate, campaign_start, campaign_end)
 VALUES
-    ('年末年始10%オフキャンペーン',10, '2024-12-30 00:00:00', '2025-01-01 23:59:59');
+    ('年末年始10%オフキャンペーン',10, '2024-12-30 00:00:00', '2025-01-01 23:59:59'),
+    ('年末年始50%オフキャンペーン',50, '2024-12-30 00:00:00', '2025-01-03 23:59:59');;
