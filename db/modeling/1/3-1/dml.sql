@@ -1,9 +1,9 @@
-INSERT INTO ProductCategory (name)
+INSERT INTO product_categories (name)
 VALUES
     ('セットメニュー'),
     ('お好みすし');
 
-INSERT INTO Products (name, price, product_category_id)
+INSERT INTO products (name, price, product_category_id)
 VALUES
     ('玉子', 100, 2),
     ('えび', 180, 2),
@@ -20,17 +20,29 @@ VALUES
     ('海鮮ちらし', 1280, 1),
     ('鮨八宝巻', 1280, 1);
 
-INSERT INTO Customers (name, tel)
+INSERT INTO customers (name, tel)
 VALUES
     ('すずき　たろう', '090-1234-5678'),
     ('さとう　じろう', '090-1234-5679');
 
-INSERT INTO Orders (paid, payment_total, customer_id)
+INSERT INTO orders (paid, payment_total, customer_id)
 VALUES
     (true, 4300, 1),
     (false, 11880, 2);
 
-INSERT INTO OrderDetails (quantity, subtotal, tax, order_id, product_id, campaign_id)
+INSERT INTO options (name, value)
+VALUES
+    ('わさび', 'あり'),
+    ('わさび', 'なし'),
+    ('シャリ', '小'),
+    ('シャリ', '大');
+
+INSERT INTO campaigns (name, discount_rate, campaign_start, campaign_end)
+VALUES
+    ('年末年始10%オフキャンペーン',10, '2024-12-30 00:00:00', '2025-01-01 23:59:59'),
+    ('年末年始50%オフキャンペーン',50, '2024-12-30 00:00:00', '2025-01-03 23:59:59');;
+
+INSERT INTO order_details (quantity, subtotal, tax_rate, order_id, product_id, campaign_id)
 VALUES
     (10, 1000 ,8, 1, 1, 1),
     (15, 3300, 8, 1, 5, 1),
@@ -40,23 +52,12 @@ VALUES
     (4, 1560, 8, 2, 6, 2),
     (1, 1280 ,8, 2, 13, 2);
 
-INSERT INTO Options (name, value)
-VALUES
-    ('わさび', 'あり'),
-    ('わさび', 'なし'),
-    ('シャリ', '小'),
-    ('シャリ', '大');
-
-INSERT INTO OrderDetailsOptions (order_details_id, option_id)
-VALUES
-    (1, 1), (2,2);
-
-INSERT INTO OrderDetailsOptions (order_details_id, option_id)
+INSERT INTO order_detail_options (order_details_id, option_id)
 VALUES
     (1, 2),
     (4, 2);
 
-INSERT INTO Campaign (name, discount_rate, campaign_start, campaign_end)
+INSERT INTO order_detail_options (order_details_id, option_id)
 VALUES
-    ('年末年始10%オフキャンペーン',10, '2024-12-30 00:00:00', '2025-01-01 23:59:59'),
-    ('年末年始50%オフキャンペーン',50, '2024-12-30 00:00:00', '2025-01-03 23:59:59');;
+    (1, 2),
+    (4, 2);
