@@ -44,13 +44,13 @@ VALUES
 
 INSERT INTO order_details (quantity, subtotal, tax_rate, order_id, product_id, campaign_id)
 VALUES
-    (10, 1000 ,8, 1, 1, 1),
-    (15, 3300, 8, 1, 5, 1),
-    (9, 5400, 8, 2, 10, 2),
-    (5, 5400, 8, 2, 10, 1),
-    (7, 3640, 8, 2, 9, 2),
-    (4, 1560, 8, 2, 6, 2),
-    (1, 1280 ,8, 2, 13, 2);
+    (10, 1000 ,0.08, 1, 1, 1),
+    (15, 3300, 0.08, 1, 5, 1),
+    (9, 5400, 0.08, 2, 10, 2),
+    (5, 5400, 0.08, 2, 10, 1),
+    (7, 3640, 0.08, 2, 9, 2),
+    (4, 1560, 0.08, 2, 6, 2),
+    (1, 1280 ,0.08, 2, 13, 2);
 
 INSERT INTO order_detail_options (order_details_id, option_id)
 VALUES
