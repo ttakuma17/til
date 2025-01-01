@@ -25,10 +25,11 @@ VALUES
     ('すずき　たろう', '090-1234-5678'),
     ('さとう　じろう', '090-1234-5679');
 
-INSERT INTO orders (paid, payment_total, customer_id)
+INSERT INTO orders (paid, subtotal, tax_amount, total, customer_id)
 VALUES
-    (true, 4300, 1),
-    (false, 11880, 2);
+    (true, 3956, 344,4300, 1),
+    (false, 11000, 880,11880, 2),
+    (false, 3726, 324,4050, 1);
 
 INSERT INTO options (name, value)
 VALUES
@@ -37,27 +38,35 @@ VALUES
     ('シャリ', '小'),
     ('シャリ', '大');
 
-INSERT INTO campaigns (name, discount_rate, campaign_start, campaign_end)
+INSERT INTO campaigns (name, campaign_type, campaign_start, campaign_end)
 VALUES
-    ('年末年始10%オフキャンペーン',10, '2024-12-30 00:00:00', '2025-01-01 23:59:59'),
-    ('年末年始50%オフキャンペーン',50, '2024-12-30 00:00:00', '2025-01-03 23:59:59');;
+    ('年末年始1皿10円オフキャンペーン', 'fixed', '2024-12-30 00:00:00', '2025-01-01 23:59:59'),
+    ('年末年始10%オフキャンペーン', 'rate', '2024-12-30 00:00:00', '2025-01-03 23:59:59');
 
-INSERT INTO order_details (quantity, subtotal, tax_rate, order_id, product_id, campaign_id)
+INSERT INTO fixed_discount_campaigns(campaign_id, discount_amount)
+VALUES (1, 10);
+
+INSERT INTO rate_discount_campaigns(campaign_id, discount_rate)
+VALUES (2, 0.9);
+
+INSERT INTO order_details (sales_unit_price, quantity, tax_rate, order_id, product_id)
 VALUES
-    (10, 1000 ,0.08, 1, 1, 1),
-    (15, 3300, 0.08, 1, 5, 1),
-    (9, 5400, 0.08, 2, 10, 2),
-    (5, 5400, 0.08, 2, 10, 1),
-    (7, 3640, 0.08, 2, 9, 2),
-    (4, 1560, 0.08, 2, 6, 2),
-    (1, 1280 ,0.08, 2, 13, 2);
+    (100, 10,0.08, 1, 1),
+    (220, 15, 0.08, 1, 5),
+    (600, 9, 0.08, 2, 10),
+    (1080, 5, 0.08, 2, 10),
+    (520, 7, 0.08, 2, 9),
+    (390, 4, 0.08, 2, 6),
+    (1280, 1 ,0.08, 2, 13),
+    (90, 10,0.08, 3, 1),
+    (210, 15, 0.08, 3, 5);
 
 INSERT INTO order_detail_options (order_details_id, option_id)
 VALUES
     (1, 2),
     (4, 2);
 
-INSERT INTO order_detail_options (order_details_id, option_id)
+INSERT INTO public.order_detail_campaigns (order_details_id, campaign_id)
 VALUES
-    (1, 2),
-    (4, 2);
+    (8, 1),
+    (9, 1);
