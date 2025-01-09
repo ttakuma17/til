@@ -1,1 +1,17 @@
+version: '3.8'
 
+services:
+  chat-postgresql:
+    image: postgres:14.15-alpine
+    container_name: db-modeling-2
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      PGTZ: Asia/Tokyo
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
