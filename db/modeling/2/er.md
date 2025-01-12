@@ -6,6 +6,7 @@
 - messageとthread_messageについて
   - messagesテーブルのtypeカラムで「message」か「thread_message」という値で投稿したメッセージの種別を管理します。
   - thread_messagesテーブルのparent_message_idでどのメッセージに紐づくスレッドメッセージかを判断して、statusによって表示する方針です。スレッドメッセージがあとから編集されたときに順序を保つために、post_orderのカラムを使います。
+- usersテーブルには本来パスワードなどのカラムが必要ですが、今回のテーブル設計では認証周りの要件は外しました。
 
 ### Event と Resource の整理について
 - Event は動詞で表現できるもの。〜する、〜日で表現して違和感のないものがEvent系と判断
@@ -30,8 +31,6 @@ erDiagram
     varchar user_uuid
     varchar name
     varchar email
-    varchar password
-    varchar salt
     timestamp created_at
   }
   %% ワークスペース(R) 
