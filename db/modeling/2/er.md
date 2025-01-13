@@ -48,33 +48,21 @@ erDiagram
     varchar workspace_uuid FK
     timestamp created_at
   }
-  %% ワークスペース参加(E)
-  join_workspaces {
+  %% ワークスペース(E)
+  manage_workspaces {
     int id PK
+    varchar status
     varchar user_uuid FK
     int workspace_id FK
-    timestamp joined_at
+    timestamp created_at
   }
-  %% チャンネル参加(E)
-  join_channels {
+  %% チャンネル(E)
+  manage_channels {
     int id PK
+    varchar status
     varchar user_uuid FK
     int channel_id FK
-    timestamp joined_at
-  }
-  %% ワークスペース退出(E)
-  leave_workspaces{
-    int id PK
-    varchar user_uuid FK
-    varchar workspace_uuid FK
-    timestamp left_at
-  }
-  %% チャンネル退出(E)
-  leave_channels{
-    int id PK
-    varchar user_uuid FK
-    varchar channel_uuid FK
-    timestamp left_at
+    timestamp created_at
   }
   %% 投稿(E)
   posts{
@@ -105,18 +93,14 @@ erDiagram
     timestamp created_at
   }
   
-  users ||--o{ join_workspaces: "creates"
-  users ||--o{ join_channels: "creates"
-  users ||--o{ leave_workspaces: "creates"
-  users ||--o{ leave_channels: "creates"
+  users ||--o{ manage_workspaces: "creates"
+  users ||--o{ manage_channels: "creates"
   users ||--o{ posts: "creates"
   channels }| -- || workspaces: "belongs to"
   posts ||--|{ channels: "has"
   posts ||--|{ messages: "has"
-  join_workspaces }|--|| workspaces: "has"
-  join_channels }|--|| channels: "has"
-  leave_workspaces }|--|| workspaces: "has"
-  leave_channels }|--|| channels: "has"
+  manage_workspaces }|--|| workspaces: "has"
+  manage_channels }|--|| channels: "has"
 ```
 
 ### 微妙と思ってること
