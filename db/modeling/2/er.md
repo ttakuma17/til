@@ -99,9 +99,9 @@ erDiagram
   thread_messages {
     int id PK
     varchar thread_message_uuid
-    varchar status
     int post_order
     varchar parent_message_uuid FK
+    varchar message_uuid FK
     timestamp created_at
   }
   
