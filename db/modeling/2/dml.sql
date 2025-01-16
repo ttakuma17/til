@@ -15,37 +15,33 @@ VALUES ('channel-uuid-1', '一般', 'workspace-uuid-1'),
        ('channel-uuid-4', '一般', 'workspace-uuid-2'),
        ('channel-uuid-5', 'プロジェクトA', 'workspace-uuid-2');
 
-INSERT INTO join_workspaces (user_uuid, workspace_uuid)
-VALUES ('user-uuid-1', 'workspace-uuid-1'),
-       ('user-uuid-1', 'workspace-uuid-2'),
-       ('user-uuid-1', 'workspace-uuid-3'),
-       ('user-uuid-2', 'workspace-uuid-1'),
-       ('user-uuid-2', 'workspace-uuid-2'),
-       ('user-uuid-2', 'workspace-uuid-3'),
-       ('user-uuid-3', 'workspace-uuid-1'),
-       ('user-uuid-3', 'workspace-uuid-2'),
-       ('user-uuid-3', 'workspace-uuid-3');
+INSERT INTO workspace_events (user_uuid, status, workspace_uuid)
+VALUES ('user-uuid-1', '参加', 'workspace-uuid-1'),
+       ('user-uuid-1', '参加', 'workspace-uuid-2'),
+       ('user-uuid-1', '参加', 'workspace-uuid-3'),
+       ('user-uuid-2', '参加', 'workspace-uuid-1'),
+       ('user-uuid-2', '参加', 'workspace-uuid-2'),
+       ('user-uuid-2', '参加', 'workspace-uuid-3'),
+       ('user-uuid-3', '参加', 'workspace-uuid-1'),
+       ('user-uuid-3', '参加', 'workspace-uuid-2'),
+       ('user-uuid-3', '参加', 'workspace-uuid-3'),
+       ('user-uuid-3', '退会', 'workspace-uuid-1'),
+       ('user-uuid-3', '退会', 'workspace-uuid-2'),
+       ('user-uuid-3', '退会', 'workspace-uuid-3');
 
-INSERT INTO join_channels (user_uuid, channel_uuid)
-VALUES ('user-uuid-1', 'channel-uuid-1'),
-       ('user-uuid-1', 'channel-uuid-2'),
-       ('user-uuid-1', 'channel-uuid-3'),
-       ('user-uuid-1', 'channel-uuid-4'),
-       ('user-uuid-1', 'channel-uuid-5'),
-       ('user-uuid-2', 'channel-uuid-1'),
-       ('user-uuid-2', 'channel-uuid-2'),
-       ('user-uuid-2', 'channel-uuid-3'),
-       ('user-uuid-2', 'channel-uuid-4'),
-       ('user-uuid-2', 'channel-uuid-5');
-
-INSERT INTO leave_workspaces (user_uuid, workspace_uuid)
-VALUES ('user-uuid-3', 'workspace-uuid-1'),
-       ('user-uuid-3', 'workspace-uuid-2'),
-       ('user-uuid-3', 'workspace-uuid-3');
-
-INSERT INTO leave_channels (user_uuid, channel_uuid)
-VALUES ('user-uuid-2', 'channel-uuid-4'),
-       ('user-uuid-2', 'channel-uuid-5');
+INSERT INTO channel_events (user_uuid, status, channel_uuid)
+VALUES ('user-uuid-1', '参加', 'channel-uuid-1'),
+       ('user-uuid-1', '参加', 'channel-uuid-2'),
+       ('user-uuid-1', '参加', 'channel-uuid-3'),
+       ('user-uuid-1', '参加', 'channel-uuid-4'),
+       ('user-uuid-1', '参加', 'channel-uuid-5'),
+       ('user-uuid-2', '参加', 'channel-uuid-1'),
+       ('user-uuid-2', '参加', 'channel-uuid-2'),
+       ('user-uuid-2', '参加', 'channel-uuid-3'),
+       ('user-uuid-2', '参加', 'channel-uuid-4'),
+       ('user-uuid-2', '参加', 'channel-uuid-5'),
+       ('user-uuid-2', '退会', 'channel-uuid-4'),
+       ('user-uuid-2', '退会', 'channel-uuid-5');
 
 -- messages テーブルへのデータ挿入
 INSERT INTO messages (message_uuid, content, type)

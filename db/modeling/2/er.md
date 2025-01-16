@@ -6,6 +6,7 @@
 - messageとthread_messageについて
   - messagesテーブルのtypeカラムで「message」か「thread_message」という値で投稿したメッセージの種別を管理します。
   - thread_messagesテーブルのparent_message_idでどのメッセージに紐づくスレッドメッセージかを判断して、statusによって表示する方針です。スレッドメッセージがあとから編集されたときに順序を保つために、post_orderのカラムを使います。
+- uuidを使用する予定の箇所のデータ型はvarcharにしています。業務で使用しているライブラリがuuid対応していないため。 
 - usersテーブルには本来パスワードなどのカラムが必要ですが、今回のテーブル設計では認証周りの要件は外しました。
 
 ### Event と Resource の整理について
@@ -48,16 +49,16 @@ erDiagram
     varchar workspace_uuid FK
     timestamp created_at
   }
-  %% ワークスペース(E)
-  manage_workspaces {
+  %% ワークスペースイベント(E)
+  workspace_events {
     int id PK
     varchar status
     varchar user_uuid FK
     int workspace_id FK
     timestamp created_at
   }
-  %% チャンネル(E)
-  manage_channels {
+  %% チャンネルイベント(E)
+  channel_events {
     int id PK
     varchar status
     varchar user_uuid FK
@@ -65,7 +66,7 @@ erDiagram
     timestamp created_at
   }
   %% 投稿(E)
-  posts{
+  posts {
     int id PK
     varchar post_uuid
     varchar status
@@ -73,6 +74,13 @@ erDiagram
     varchar message_uuid FK
     varchar channel_uuid FK
     timestamp posted_at
+  }
+  %% 検索(E)
+  search {
+    varchar id PK
+    text search_query
+    varchar user_uuid FK
+    timestamp searched_at
   }
   %% メッセージ(R)
   messages {
@@ -83,7 +91,6 @@ erDiagram
     timestamp created_at
   }
   %% スレッドメッセージ(R)
-  messages ||--o{ thread_messages: "has"
   thread_messages {
     int id PK
     varchar thread_message_uuid
@@ -92,22 +99,26 @@ erDiagram
     varchar message_uuid FK
     timestamp created_at
   }
-  
-  users ||--o{ manage_workspaces: "creates"
-  users ||--o{ manage_channels: "creates"
+        
+  users ||--o{ workspace_events: "creates"
+  users ||--o{ channel_events: "creates"
   users ||--o{ posts: "creates"
+  users ||--o{ search: "creates"
   channels }| -- || workspaces: "belongs to"
   posts ||--|{ channels: "has"
   posts ||--|{ messages: "has"
-  manage_workspaces }|--|| workspaces: "has"
-  manage_channels }|--|| channels: "has"
+  messages ||--o{ thread_messages: "has"
+  workspace_events }|--|| workspaces: "has"
+  channel_events }|--|| channels: "has"
 ```
 
 ### 微妙と思ってること
 - スレッドメッセージの順序をどう管理するのがベストか？
   - 今の設計だと、投稿時にparent_message_idに紐づくスレッドメッセージの件数をカウントしてから、Insertしないと順序が保てないのが気になる
-- チャンネルとワークスペースの参加/退出テーブルが別々なこと
-  - 1テーブルで管理していれば、最後のレコードのstatusだけみれば状態がわかるからそのほうが楽だとは思う。
+- チャンネルイベントとワークスペースイベントと言う名前
+  - 役割わかりにくいからこの命名はいやだが、いいの思いつかなかった
+  - ステータスごとにテーブルを分ければ、テーブル名としてはわかりやすいがJOINが多数必要になる。
+  - 今回はそこまでjoinさせたくないというのを優先してテーブルへまとめた
 
 #### 参考
 - [イミュータブルデータモデル](https://scrapbox.io/kawasima/%E3%82%A4%E3%83%9F%E3%83%A5%E3%83%BC%E3%82%BF%E3%83%96%E3%83%AB%E3%83%87%E3%83%BC%E3%82%BF%E3%83%A2%E3%83%87%E3%83%AB)
