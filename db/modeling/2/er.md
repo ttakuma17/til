@@ -75,13 +75,6 @@ erDiagram
     varchar channel_uuid FK
     timestamp posted_at
   }
-  %% 検索(E)
-  search {
-    varchar id PK
-    text search_query
-    varchar user_uuid FK
-    timestamp searched_at
-  }
   %% メッセージ(R)
   messages {
     int id PK
@@ -103,7 +96,6 @@ erDiagram
   users ||--o{ workspace_events: "creates"
   users ||--o{ channel_events: "creates"
   users ||--o{ posts: "creates"
-  users ||--o{ search: "creates"
   channels }| -- || workspaces: "belongs to"
   posts ||--|{ channels: "has"
   posts ||--|{ messages: "has"
