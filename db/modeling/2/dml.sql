@@ -43,7 +43,6 @@ VALUES ('user-uuid-1', '参加', 'channel-uuid-1'),
        ('user-uuid-2', '退会', 'channel-uuid-4'),
        ('user-uuid-2', '退会', 'channel-uuid-5');
 
--- messages テーブルへのデータ挿入
 INSERT INTO messages (message_uuid, content, type)
 VALUES ('message-uuid-1', 'こんにちは', 'message'),
        ('message-uuid-2', '進捗はどうですか？', 'thread_message'),
@@ -56,7 +55,6 @@ VALUES ('message-uuid-1', 'こんにちは', 'message'),
        ('message-uuid-9', '来週いっぱい休みいただいています', 'thread_message'),
        ('message-uuid-10', 'では出勤メンバーだけでスケジュール調整します', 'thread_message');
 
--- thread_messages テーブルへのデータ挿入
 INSERT INTO thread_messages (thread_message_uuid, post_order, parent_message_uuid, message_uuid)
 VALUES ('thread-message-uuid-1', 1, 'message-uuid-1', 'message-uuid-2'),
        ('thread-message-uuid-2', 1, 'message-uuid-4', 'message-uuid-5'),
@@ -64,7 +62,6 @@ VALUES ('thread-message-uuid-1', 1, 'message-uuid-1', 'message-uuid-2'),
        ('thread-message-uuid-4', 1, 'message-uuid-8', 'message-uuid-9'),
        ('thread-message-uuid-5', 2, 'message-uuid-8', 'message-uuid-10');
 
--- posts テーブルへのデータ挿入
 INSERT INTO posts (post_uuid, status, user_uuid, message_uuid, channel_uuid)
 VALUES ('post-uuid-1', 'CREATED', 'user-uuid-1', 'message-uuid-1', 'channel-uuid-1'),
        ('post-uuid-2', 'CREATED', 'user-uuid-2', 'message-uuid-2', 'channel-uuid-1'),

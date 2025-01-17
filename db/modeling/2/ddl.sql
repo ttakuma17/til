@@ -101,7 +101,6 @@ CREATE TABLE posts
         REFERENCES channels (channel_uuid)
 );
 
--- indexを追加
 CREATE INDEX idx_users_user_uuid ON users (user_uuid);
 CREATE INDEX idx_workspaces_workspace_uuid ON workspaces (workspace_uuid);
 CREATE INDEX idx_messages_message_uuid ON messages (message_uuid);
