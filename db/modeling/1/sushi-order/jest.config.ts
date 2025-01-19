@@ -1,4 +1,6 @@
-export default {
+import type { Config } from 'jest';
+
+const config: Config = {
   "roots": [
     "<rootDir>/src"
   ],
@@ -10,3 +12,5 @@ export default {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
 }
+
+export default config;
