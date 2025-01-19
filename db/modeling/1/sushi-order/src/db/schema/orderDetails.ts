@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, serial, integer, numeric, index } from 'drizzle-orm/pg-core';
 import { schemaTimestamps } from './schemaBase'
 import { orders } from './orders';
 import { products } from './products';
@@ -10,6 +10,8 @@ export const orderDetails = pgTable('order_details', {
     taxRate: numeric('tax_rate').notNull(),
     orderId: serial('order_id').references(() => orders.id),
     productId: serial('product_id').references(() => products.id),
-    // campaignId: serial('campaign_id').references(() => campaigns.id), いらん
     ...schemaTimestamps
-});
+}, (table) => [
+    index("fk_order_id_idx").on(table.orderId),
+    index("fk_product_id_idx").on(table.productId),
+]);

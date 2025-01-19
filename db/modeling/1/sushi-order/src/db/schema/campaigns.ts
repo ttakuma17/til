@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, varchar, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, integer, varchar, timestamp, index } from 'drizzle-orm/pg-core';
 import { schemaTimestamps } from './schemaBase'
 
 export const campaigns = pgTable('campaigns', {

@@ -1,4 +1,4 @@
-import { pgTable, serial, boolean, integer, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, serial, boolean, integer, varchar, index } from 'drizzle-orm/pg-core';
 import { schemaTimestamps } from './schemaBase'
 import { productCategories } from './productCategories';
 
@@ -8,4 +8,6 @@ export const products = pgTable('products', {
     unitPrice: integer('unit_price').notNull(),
     productCategoryId: serial('product_category_id').references(() => productCategories.id),
     ...schemaTimestamps
-});
+}, (table) => [
+    index("fk_product_category_id_idx").on(table.productCategoryId),
+]);
