@@ -22,6 +22,11 @@ npm run dev
 open http://localhost:3000
 ```
 
+OpenAPIドキュメント確認時
+```
+open http://localhost:3000/doc
+```
+
 ## ルーティングの設定
 
 - 以下のようにディレクトリを作成し、ファイルを配置
@@ -61,13 +66,14 @@ Drizzle でmigrationのdownが実装されていないので、一旦すべて�
 - https://zenn.dev/slowhand/articles/b7872e09b84e15
 
 ## あとでやること 
-- RPC使えるようにしておく
-    - https://zenn.dev/yusukebe/articles/a00721f8b3b92e
 - Sushi Order用のAPI作成
-- Zodの使い方確認   
+- Zodの使い方確認
     - drizzle zodも調べる
-- testcontainersでpostgresコンテナ上げるようにする
 - SeedDataをDrizzle経由で作成する
     - https://orm.drizzle.team/docs/seed-overview
-- Drizzle のmigration downってまだないらしい。GitHubにIssueにはなってた
+- RPC使えるようにしたい。client側が必要になったときで良い
+    - https://zenn.dev/yusukebe/articles/a00721f8b3b92e
+    - https://zenn.dev/chot/articles/e109287414eb8c
+- testcontainersでpostgresコンテナ上げるようにする
+- Drizzle のmigration downってまだないらしい。どう対応するのがベストか調べる。GitHubにIssueにはなってた
     - https://zenn.dev/toridori/articles/7ea35472f8a30c
