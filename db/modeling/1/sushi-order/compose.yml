@@ -1,0 +1,15 @@
+services:
+  sushi-postgres:
+    image: postgres:14.15-alpine
+    container_name: sushi-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      PGTZ: Asia/Tokyo
+    ports:
+      - "5433:5432"
+    volumes:
+      - sushi_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  sushi_postgres_data:
