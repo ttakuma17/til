@@ -1,11 +1,16 @@
 import { swaggerUI } from '@hono/swagger-ui';
 import { serve } from '@hono/node-server'
 import { OpenAPIHono } from '@hono/zod-openapi'
-import echoApi from './api/echo/echoApi';
+import echoApi from './routes/echo/echoApi';
+import getCustomer from './routes/customer/getCustomerRoute';
+import createCustomer from './routes/customer/createCustomerRoute';
 
 const app = new OpenAPIHono()
 
-app.route('/echo', echoApi)
+app
+  .route('/api', echoApi)
+  .route('/api', getCustomer)
+  .route('/api', createCustomer)
   .doc('/specification', {
     openapi: '3.0.0',
     info: {

@@ -11,6 +11,11 @@
       "node",
       "jest"
     ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
   }

@@ -1,7 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
-export const route = createRoute({
-    path: '/',
+export const echoRoute = createRoute({
+    path: '/echo',
     method: 'post',
     description: '受け取った入力値をそのまま応答する',
     request: {

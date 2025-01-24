@@ -38,10 +38,8 @@ open http://localhost:3000/doc
 ## DBスキーマ反映手順
 
 1. db/schema/ 配下にスキーマファイルを作成する
-2. `npm run drizzle:push` を実行する
-
-Drizzle でmigrationのdownが実装されていないので、一旦すべての変更をpushする形で反映させている。  
-本番とかだとやらないだろうけど、推奨の手順とかはまた調べる
+2. `npm run drizzle:generate` を実行
+3. `npm run drizzle:migrate`  を実行
 
 ### テスト実行手順
 1. ***.test.tsという名前でファイルを作成
@@ -77,3 +75,14 @@ Drizzle でmigrationのdownが実装されていないので、一旦すべて�
 - testcontainersでpostgresコンテナ上げるようにする
 - Drizzle のmigration downってまだないらしい。どう対応するのがベストか調べる。GitHubにIssueにはなってた
     - https://zenn.dev/toridori/articles/7ea35472f8a30c
+
+## Hono Zod Drizzle OpenAPI 
+
+middleware > ここにはHonoのmiddlewareをカスタマイズしたファイルをいれる
+
+- Hono
+- RPC
+- Zod
+- pino
+- Drizzle
+- OpenAPI

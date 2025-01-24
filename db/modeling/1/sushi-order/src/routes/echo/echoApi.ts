@@ -1,9 +1,9 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { route } from './echoSchema'
+import { echoRoute } from './echoSchema'
 
 const echoApi = new OpenAPIHono();
 
-echoApi.openapi(route, async c => {
+echoApi.openapi(echoRoute, async c => {
     const body = await c.req.valid('json');
     return c.json({ result: body.input });
 });

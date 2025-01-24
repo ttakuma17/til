@@ -10,5 +10,5 @@ export const orderDetailCampaigns = pgTable('order_detail_campaigns', {
     ...schemaTimestamps
 }, (table) => [
     index("fk_campaign_order_detail_id_idx").on(table.orderDetailId),
-    index("fk_campaign_id__idx").on(table.campaginId),
+    index("fk_campaign_id_idx").on(table.campaginId),
 ]);
