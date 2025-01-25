@@ -8,10 +8,10 @@ export const orders = pgTable('orders', {
     subtotal: integer('subtotal').notNull(),
     taxAmount: integer('tax_amount').notNull(),
     total: integer('total').notNull(),
-    customerId: serial('customer_id').references(() => customers.id),
+
+    customerId: serial('customer_id').references(() => customers.id).notNull(),
+
     ...schemaTimestamps
-}, (table) => {
-    return {
-        fkCustomerIdx: index("fk_customer_id_idx").on(table.customerId),
-    }
-});
+}, (table) => [
+    index("fk_customer_id_idx").on(table.customerId),
+]);

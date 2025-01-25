@@ -6,7 +6,7 @@ export const campaigns = pgTable('campaigns', {
     name: varchar('name').notNull(),
     campaignType: varchar('campaign_type').notNull(),
     discount: integer('discount').notNull(),
-    campaignStart: timestamp('').notNull(),
-    campaignEnd: timestamp('').notNull(),
+    campaignStart: timestamp('campaignStart').notNull(),
+    campaignEnd: timestamp('campaignEnd').notNull(),
     ...schemaTimestamps
 });
