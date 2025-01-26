@@ -1,30 +1,22 @@
--- ディレクトリ配下の公開中ドキュメントを取得
-SELECT 
-    documents.id as "ドキュメントID",
-    documents.title as "タイトル",
-    documents.content as "本文"
-FROM directories 
-JOIN writes ON writes.directory_id = directories.id
-JOIN write_statuses ON write_statuses.write_id = writes.id 
-JOIN documents on documents.id = writes.document_id
-WHERE directories.name = 'documents' AND write_statuses.status = '公開中';
+-- ディレクトリ内のドキュメントの順番を取得する 
+SELECT
+    directory_id,
+    document_id,
+    priority
+    -- ROW_NUMBER() OVER (PARTITION BY directory_id ORDER BY priority) as display_order -- 最悪priorityに抜けが生まれたとしても、display_orderで何番目かは出してくれるが今は不要
+FROM
+    document_order
+WHERE directory_id = 1;
 
--- 特定ディレクトリ配下のディレクトリ一覧を表示
-SELECT 
-    directories.id AS 親ディレクトリID,
-    directories.name AS 親ディレクトリ名,
-    self_directories.name AS 子ディレクトリ名
-FROM directories
-JOIN directory_paths ON directories.id = directory_paths.parent_id
-JOIN directories AS self_directories ON directory_paths.child_id = self_directories.id
-WHERE directories.name = 'documents'; 
+-- ドキュメントの追加
+INSERT INTO document_order (directory_id, document_id, priority) 
+VALUES (1, 3, 4);
 
--- 特定のドキュメントの更新履歴を作成日時順に取得
-SELECT * FROM document_histories 
-WHERE document_id = 1 
-ORDER BY created_at DESC
-
--- 別のディレクトリへドキュメントを移動
-UPDATE writes 
-SET directory_id = 3, user_id = 2
-WHERE writes.id = 1
+-- ドキュメントの移動 2番と3番いれかえ
+UPDATE document_order 
+SET priority = CASE 
+    WHEN priority = 2 THEN 3 
+    WHEN priority = 3 THEN 2
+    ELSE priority
+    END
+WHERE priority IN(2, 3)
