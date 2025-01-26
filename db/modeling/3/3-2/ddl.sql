@@ -84,3 +84,5 @@ CREATE TABLE document_order (
 );
 CREATE INDEX document_order_directory_id_idx ON document_order (directory_id);
 CREATE INDEX document_order_document_id_idx ON document_order (document_id);
+
+CREATE INDEX document_order_priority_idx ON document_order (priority);
