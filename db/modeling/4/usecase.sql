@@ -1,8 +1,7 @@
--- /penpen だれかにタスクを依頼する
--- 4つINSERT
-
--- /penpen-outgoing 自分が設定したタスク一覧を表示
--- clients と remindsで自分のSlackUserId、かつ、completed = falseのものを検索
+-- /penpen-outgoing 自分(U1234567890)が設定したタスク一覧を表示
+SELECT * FROM clients JOIN reminds ON clients.id = reminds.client_id
+WHERE slack_id = 'U1234567890' AND done = FALSE;
 
 -- /penpen-list 自分宛てのタスク一覧を表示する
--- representatives と remindsで自分のSlackUserId、かつ、completed = falseのものを検索
+SELECT * FROM representatives JOIN reminds ON representatives.id = reminds.representative_id
+WHERE slack_id = 'U1234567890' AND done = FALSE;
