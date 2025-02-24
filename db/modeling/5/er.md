@@ -96,112 +96,85 @@ erDiagram
 title: ブログサービス - 物理設計
 ---
 erDiagram
-  %% ユーザー登録開始
-  user_registration_start {
-    varchar id PK
-    varchar user_uuid FK
-    datetime created_at
-  }
-  %% ユーザー登録終了
-  user_registration_end {
-    varchar id PK
-    varchar user_uuid FK
-    datetime created_at
-  }
-  %% ユーザー(R)
-  users {
+  %% ユーザー操作(E)
+  %% operation_type: "register/update/deactivate/reactivate"
+  %% from_user_id: "新規登録時は'new'"
+  user_operations {
     varchar id PK
     varchar user_uuid
-    varchar name
-    varchar email
-    varchar status
+    varchar operation_type
+    varchar from_user_id FK 
+    varchar to_user_id FK
     datetime created_at
+    integer version
   }
-  %% 記事作成(E)
-  create_draft {
-    varchar id PK
-    varchar user_uuid FK
-    varchar draft_article_uuid FK
-    datetime created_at
+
+  %% ユーザー(R)
+  %% status: "active/inactive"
+  users {
+      varchar id PK 
+      varchar user_uuid
+      varchar name
+      varchar email
+      varchar status
+      integer version
   }
+
+  %% 記事操作(E)
+  %% operation_type: "create_draft/publish_start/update_start/update_end/publish_end/draft_delete"
+  %% user_uuid: "操作したユーザー"
+  article_operations {
+      varchar id PK
+      varchar article_uuid
+      varchar operation_type
+      varchar from_article_id FK
+      varchar to_article_id FK
+      varchar user_uuid FK
+      integer version
+      datetime created_at
+  }
+
   %% ドラフト記事(R)
+  %% status: "draft/updating/deleted"
   draft_articles {
-    varchar id PK
-    varchar title
-    varchar content
+      varchar id PK
+      varchar article_uuid
+      integer version
+      varchar title
+      varchar content
+      varchar status 
   }
-  %% 公開開始(E)
-  publish_start {
-    varchar id PK
-    varchar draft_article_uuid FK
-    varchar published_article_uuid FK
-    datetime created_at
-  }
-  %% 記事更新(E)
-  update_start {
-    varchar id PK
-    varchar draft_article_uuid FK
-    varchar published_article_uuid FK
-    datetime created_at
-  }
-  %% 記事更新完了(E)
-  update_end {
-    varchar id PK
-    varchar draft_article_uuid FK
-    varchar published_article_uuid FK
-    datetime created_at
-  }
-  %% 公開終了(E)
-  publish_end {
-    varchar id PK
-    varchar published_article_uuid FK
-    varchar unpublished_article_uuid FK
-    datetime created_at
-  }
+
   %% 公開記事(R)
+  %% status: "published/updating"
   published_articles {
-    varchar id PK
-    varchar title
-    text content
+      varchar id PK
+      varchar article_uuid 
+      integer version
+      varchar title
+      text content
+      varchar status
   }
+
   %% 非公開記事(R)
   unpublished_articles {
-    varchar id PK
-    varchar published_article_uuid FK
-    datetime created_at
-  }
-  %% 最新記事(R)
-  latest_articles {
-    varchar id PK
-    varchar title
-    text content
+      varchar id PK
+      varchar published_article_uuid FK
   }
 
-  user_registration_start ||--|{ users: "creates"
-  user_registration_end ||--|{ users: "creates"
-  users ||--o{ create_draft: "creates"
-  create_draft }|--|| draft_articles: "has"
-  draft_articles ||--o{ update_start: "creates"
-  draft_articles ||--o{ publish_start: "creates"
-  draft_articles ||--o{ update_end: "creates"
-  published_articles ||--o{ publish_end: "creates"
-  update_start }o--|| published_articles: "has"
-  update_end }o--|| published_articles: "has"
-  publish_start }|--|| published_articles: "has"
-  publish_end }|--|| unpublished_articles: "has"  
-  published_articles ||--|| latest_articles: "creates"
+  users ||--o{ user_operations: "performs"
+  user_operations ||--o{ users: "has"
+  users ||--o{ article_operations: "performs"
+  article_operations ||--o{ draft_articles: "creates/updates"
+  article_operations ||--o{ published_articles: "creates/updates"
+  article_operations ||--o{ unpublished_articles: "creates" 
 ```
-
 
 ### 微妙と思ってること
 
 TODO 
-- イベントをまとめるとcreated_atがresourceテーブルにほしくなってしまうの整理
-- 記事のバージョン履歴一覧の対応方法を考える
-- 公開記事のテーブルやっぱりidもう一個いるかも？トランザクション用のidと記事自体のidがないと、記事の更新反映がきつい
-- publish_startとupdate_start, update_endが並列になっているのがなんか違和感
-  - 状態遷移としては正しいけど、テーブルにしたときにどうするかを検討したい
-- これらがおわったら、物理設計なので、どこにインデックスはるかとかまでを決めてからDoneにする
+- どこにインデックスはるかとかまでを決めてからDoneにする
+- テーブルとしてはシンプルになったが、どこにインデックスはるか、複合キーとするかとかは考えもの
 
 #### 参考
 
