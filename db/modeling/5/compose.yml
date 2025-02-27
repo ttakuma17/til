@@ -1,0 +1,15 @@
+services:
+  blog-postgresql:
+    image: postgres:14.15-alpine
+    container_name: db-modeling-5
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      PGTZ: Asia/Tokyo
+    ports:
+      - "5439:5432"
+    volumes:
+      - blog_data:/var/lib/postgresql/data
+
+volumes:
+  blog_data:

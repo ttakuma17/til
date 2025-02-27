@@ -1,13 +1,19 @@
 # 5-1
 
-### 仕様整理
+### 設計意図
+- ユーザーとブログの状態遷移を明示したうえで、仕様を満たすようにテーブル設計しました。
+- 論理設計時点では、各イベントをテーブルにしましたが、物理設計ではそれらをまとめる判断をしました。
+  - 理由
+    - テーブルの数が多くなってしまい、毎度JOINしないと必要な情報を取得できない
+    - 状態遷移図がそのままテーブルに反映された形になっていまい、同列にならぶと違和感のあるものがあったため
+      - ドラフト記事を公開開始/終了というイベントとドラフト/公開済みの記事を更新開始/更新終了するというイベントがあった
 
 ### ユーザーの状態遷移
 
 ```mermaid
 stateDiagram-v2
-  active_users: ユーザー
-  inactive_users: 退会済みユーザー
+  active_users: アクティブユーザー
+  inactive_users: 非アクティブユーザー
   
   [*] --> active_users: ユーザー登録
   active_users --> inactive_users: ユーザー除外
@@ -37,7 +43,7 @@ stateDiagram-v2
 
 ```mermaid
 ---
-title: ブログサービス - 論理設計
+title: ブログサービス - 論理設計細かめ
 ---
 erDiagram
   %% ユーザー(R)
@@ -93,18 +99,15 @@ erDiagram
 
 ```mermaid
 ---
-title: ブログサービス - 物理設計
+title: ブログサービス - ERD
 ---
 erDiagram
-  %% ユーザー操作(E)
-  %% operation_type: "register/update/deactivate/reactivate"
-  %% from_user_id: "新規登録時は'new'"
-  user_operations {
+  %% ユーザーイベント(E)
+  %% event_type: "registered/updated/deactivated/reactivated"
+  user_events {
     varchar id PK
     varchar user_uuid
-    varchar operation_type
-    varchar from_user_id FK 
-    varchar to_user_id FK
+    varchar event_type
     datetime created_at
     integer version
   }
@@ -120,22 +123,20 @@ erDiagram
       integer version
   }
 
-  %% 記事操作(E)
-  %% operation_type: "create_draft/publish_start/update_start/update_end/publish_end/draft_delete"
-  %% user_uuid: "操作したユーザー"
-  article_operations {
+  %% 記事イベント(E)
+  %% event_type: "draft_created/draft_deleted/published/unpublished/republished"
+  %% user_uuid: "イベントを発生させたユーザー"
+  article_events {
       varchar id PK
       varchar article_uuid
-      varchar operation_type
-      varchar from_article_id FK
-      varchar to_article_id FK
-      varchar user_uuid FK
+      varchar event_type
+      varchar user_uuid
       integer version
       datetime created_at
   }
 
   %% ドラフト記事(R)
-  %% status: "draft/updating/deleted"
+  %% status: "created/deleted"
   draft_articles {
       varchar id PK
       varchar article_uuid
@@ -146,7 +147,7 @@ erDiagram
   }
 
   %% 公開記事(R)
-  %% status: "published/updating"
+  %% status: "created/deleted"
   published_articles {
       varchar id PK
       varchar article_uuid 
@@ -157,25 +158,21 @@ erDiagram
   }
 
   %% 非公開記事(R)
+  %% status: "created/deleted"
   unpublished_articles {
       varchar id PK
-      varchar published_article_uuid FK
+      varchar published_article_uuid
+      varchar status
   }
 
-  users ||--o{ user_operations: "performs"
-  user_operations ||--o{ users: "has"
-  users ||--o{ article_operations: "performs"
-  article_operations ||--o{ draft_articles: "creates/updates"
-  article_operations ||--o{ published_articles: "creates/updates"
-  article_operations ||--o{ unpublished_articles: "creates" 
+  users ||--o{ user_events: "creates"
+  user_events ||--o{ users: "affects"
+  users ||--o{ article_events: "creates"
+  article_events ||--o{ draft_articles: "affects"
+  article_events ||--o{ published_articles: "affects"
+  article_events ||--o{ unpublished_articles: "creates" 
 ```
 
 ### 微妙と思ってること
 
-TODO 
-- どこにインデックスはるかとかまでを決めてからDoneにする
-- テーブルとしてはシンプルになったが、どこにインデックスはるか、複合キーとするかとかは考えもの
-
 #### 参考
-
-
