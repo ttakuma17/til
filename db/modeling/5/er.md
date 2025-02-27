@@ -34,10 +34,10 @@ stateDiagram-v2
   [*] --> Draft: 記事作成
   Draft --> Published: 公開開始 (新規記事)
   Published --> Private: 公開終了
+  Private --> Published: 再公開
     
-  Published --> Draft: 更新作業開始
-  Draft --> Published: 更新完了 (再公開)
-  Published --> Latest: 最新記事として同期
+  Published --> Draft: 更新開始
+  Draft --> Published: 更新完了
   Private --> [*]
 ```
 
@@ -174,5 +174,6 @@ erDiagram
 ```
 
 ### 微妙と思ってること
+- 今のテーブル設計だとResource Tableに外部キー制約つけれない
+  - 外部キー制約をつけるカラムの参照先がUniqueであることが求められるが、リソースの識別子は同じデータが入りうるため
 
-#### 参考
