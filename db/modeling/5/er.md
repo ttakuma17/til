@@ -102,75 +102,69 @@ erDiagram
 title: ブログサービス - ERD
 ---
 erDiagram
-  %% ユーザーイベント(E)
-  %% event_type: "registered/updated/deactivated/reactivated"
-  user_events {
-    varchar id PK
-    varchar user_uuid
-    varchar event_type
+  %% ユーザー登録開始(E)
+  user_event_start {
+    varchar user_event_id PK
     datetime created_at
-    integer version
   }
 
   %% ユーザー(R)
-  %% status: "active/inactive"
   users {
-      varchar id PK 
+      varchar user_event_id PK
       varchar user_uuid
       varchar name
       varchar email
-      varchar status
-      integer version
   }
 
-  %% 記事イベント(E)
-  %% event_type: "draft_created/draft_deleted/published/unpublished/republished"
-  %% user_uuid: "イベントを発生させたユーザー"
-  article_events {
-      varchar id PK
-      varchar article_uuid
-      varchar event_type
-      varchar user_uuid
-      integer version
-      datetime created_at
+  %% ユーザー登録終了(E)
+  %% user_statusはactive or inactive
+  user_event_end {
+    varchar user_event_result_id PK
+    varchar user_event_id FK
+    varchar user_status
+    datetime created_at
   }
 
-  %% ドラフト記事(R)
-  %% status: "created/deleted"
-  draft_articles {
-      varchar id PK
-      varchar article_uuid
-      integer version
-      varchar title
-      varchar content
-      varchar status 
+  %% 記事登録開始(E)
+  article_event_start {
+    varchar article_event_id PK
+    varchar article_uuid
+    datetime created_at
   }
 
-  %% 公開記事(R)
-  %% status: "created/deleted"
-  published_articles {
-      varchar id PK
-      varchar article_uuid 
-      integer version
-      varchar title
-      text content
-      varchar status
+  %% 記事(R)
+  articles {
+    varchar article_event_id PK
+    varchar article_uuid
+    integer version
+    varchar title
+    varchar content
   }
 
-  %% 非公開記事(R)
-  %% status: "created/deleted"
-  unpublished_articles {
-      varchar id PK
-      varchar published_article_uuid
-      varchar status
+
+  %% 記事登録終了(E)
+  %% user_statusはactive or inactive
+  article_event_end {
+    varchar article_event_result_id PK
+    varchar article_event_id
+    varchar article_status
+    datetime created_at
   }
 
-  users ||--o{ user_events: "creates"
-  user_events ||--o{ users: "affects"
-  users ||--o{ article_events: "creates"
-  article_events ||--o{ draft_articles: "affects"
-  article_events ||--o{ published_articles: "affects"
-  article_events ||--o{ unpublished_articles: "creates" 
+  %% ユーザーブログcreates (R)
+  user_article_creates {
+    varchar user_uuid FK
+    varchar article_event_id FK
+  }
+
+  user_event_start o|--|{ users: "creates"
+  users }|--|o user_event_end: "creates"
+
+  article_event_start o|--|{ articles: "creates"
+  articles }|--|o article_event_end: "creates"
+
+  users}|--||user_article_creates: ""
+  user_article_creates ||--|{ articles: ""
 ```
 
 ### 微妙と思ってること
