@@ -9,8 +9,7 @@ CREATE TABLE user_profiles (
     user_id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    UNIQUE(email)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- ユーザー情報変更イベント(E)
@@ -29,12 +28,7 @@ CREATE TABLE user_roles (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- 初期ロールデータ
-INSERT INTO user_roles (id, name) VALUES 
-    ('role-1', 'admin'),
-    ('role-2', 'general_user');
-
--- セルフサインアップイベント(E)
+-- サインアップイベント(E)
 CREATE TABLE user_self_registration_events (
     id VARCHAR(36) PRIMARY KEY,
     user_id VARCHAR(36) NOT NULL,
@@ -51,7 +45,7 @@ CREATE TABLE user_role_assignment_events (
     id VARCHAR(36) PRIMARY KEY,
     user_id VARCHAR(36) NOT NULL,
     role_id VARCHAR(36) NOT NULL,
-    assigned_by_user_id VARCHAR(36) NOT NULL,
+    assigned_by_user_id VARCHAR(36) NOT NULL DEFAULT 'system',
     assigned_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (role_id) REFERENCES user_roles(id),
@@ -169,25 +163,11 @@ CREATE INDEX idx_article_unpublication_events_article_id ON article_unpublicatio
 CREATE INDEX idx_article_unpublication_events_user_id ON article_unpublication_events(user_id);
 CREATE INDEX idx_article_deletion_events_article_id ON article_deletion_events(article_id);
 CREATE INDEX idx_article_deletion_events_user_id ON article_deletion_events(user_id);
-
--- タイムスタンプのインデックス
-CREATE INDEX idx_user_self_registration_events_date ON user_self_registration_events(registered_date);
-CREATE INDEX idx_user_role_assignment_events_date ON user_role_assignment_events(assigned_date);
-CREATE INDEX idx_user_withdrawal_events_date ON user_withdrawal_events(withdrawn_date);
-CREATE INDEX idx_user_forced_withdrawal_events_date ON user_forced_withdrawal_events(forced_withdrawn_date);
-CREATE INDEX idx_draft_creation_events_date ON draft_creation_events(draft_created_date);
-CREATE INDEX idx_draft_deletion_events_date ON draft_deletion_events(draft_deleted_date);
-CREATE INDEX idx_article_publication_events_date ON article_publication_events(published_date);
-CREATE INDEX idx_article_unpublication_events_date ON article_unpublication_events(unpublished_date);
-CREATE INDEX idx_article_deletion_events_date ON article_deletion_events(deleted_date);
 CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX idx_user_profiles_email ON user_profiles(email);
 CREATE INDEX idx_user_profile_change_events_user_id ON user_profile_change_events(user_id);
 CREATE INDEX idx_user_profile_change_events_profile_id ON user_profile_change_events(user_profile_id);
 CREATE INDEX idx_user_profile_change_events_date ON user_profile_change_events(changed_date);
 CREATE INDEX idx_user_self_registration_events_profile_id ON user_self_registration_events(user_profile_id);
-
-
--- タイトル検索用インデックス
 CREATE INDEX idx_published_articles_title ON published_articles(title);
 CREATE INDEX idx_draft_articles_title ON draft_articles(title);
