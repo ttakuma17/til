@@ -4,7 +4,8 @@
 - テーブルの増加を重く捉えずに、責務ごとにテーブルを分ける方針
 - ResourceとEventに分けて設計する
 - 完全にUPDATEのSQLが発生しないテーブル設計にする
-- テーブル数は増えており、単純にJOINSしてSELECT系を実行することで取得はできるが、性能問題があると仮定して、できるだけSQLで性能問題を回避できるようにusecaseのSQLを工夫する方針
+- Event ごとにテーブルをわけるという設計を実行したが、クエリがものすごく複雑になった。
+  - INSERTする分には問題ないがクエリ書こうとするときの負荷が高くEventだけはまとめることにした。
 
 ## 仕様
 ### ユーザー
@@ -26,153 +27,78 @@
 title: ブログサービス
 ---
 erDiagram
-  %% ユーザー(R)
-  users {
-    varchar id PK
-  }
+    users {
+        varchar(36) id PK
+    }
 
-  %% ユーザー情報(R)
-  user_profiles {
-    varchar id PK
-    varchar user_id FK
-    varchar name
-    varchar email
-  }
+    user_profile_versions {
+        varchar(36) id PK
+        varchar(36) user_id FK
+        int version
+        varchar(255) name
+        varchar(255) email
+        timestamp created_at
+    }
 
-  %% ユーザー情報変更イベント(E)
-  user_profile_change_events {
-    varchar id PK
-    varchar user_id FK
-    varchar user_profile_id FK
-    timestamp changed_date
-  }
+    user_roles {
+        varchar(36) id PK
+        varchar(50) name
+    }
 
-  %% ユーザーロール(R)
-  user_roles {
-    varchar id PK
-    varchar name
-  }
+    user_event_types {
+        varchar(10) id PK
+        varchar(50) name
+    }
 
-  %% セルフサインアップイベント(E)
-  user_self_registration_events {
-    varchar id PK
-    varchar user_id FK
-    varchar role_id FK
-    varchar user_profile_id FK
-    timestamp registered_date
-  }
+    user_events {
+        varchar(36) id PK
+        varchar(36) user_id FK
+        varchar(10) event_type_id FK
+        varchar(36) actor_user_id FK
+        int version
+        varchar(36) role_id FK
+        varchar(1000) reason
+        timestamp occurred_at
+    }
 
-  %% ユーザーロール割り当てイベント(E)
-  user_role_assignment_events {
-    varchar id PK
-    varchar user_id FK
-    varchar role_id FK
-    varchar assigned_by_user_id FK
-    timestamp assigned_date
-  }
-  
-  %% 強制退会イベント(E)
-  user_forced_withdrawal_events {
-    varchar id PK
-    varchar user_id FK
-    varchar admin_user_id FK
-    varchar reason
-    timestamp forced_withdrawn_date
-  }
+    articles {
+        varchar(36) id PK
+    }
 
+    article_versions {
+        varchar(36) id PK
+        varchar(36) article_id FK
+        int version
+        varchar(255) title
+        text text
+        timestamp created_at
+    }
 
-  %% ユーザー退会イベント(E)
-  user_withdrawal_events {
-    varchar id PK
-    varchar user_id FK
-    timestamp withdrawn_date
-  }
+    article_event_types {
+        varchar(10) id PK
+        varchar(50) name
+    }
 
-  
-  %% 記事(R)
-  articles {
-    varchar id PK
-  }
+    article_events {
+        varchar(36) id PK
+        varchar(36) article_id FK
+        varchar(10) event_type_id FK
+        varchar(36) user_id FK
+        int version
+        varchar(1000) reason
+        varchar(50) status
+        timestamp occurred_at
+    }
 
-  %% ドラフト作成(E)
-  draft_creation_events {
-    varchar id PK
-    varchar article_id FK
-    varchar user_id FK
-    timestamp draft_created_date
-  }
+    %% リレーションシップ
+    users ||--o{ user_profile_versions : "has versions"
+    users ||--o{ user_events : "has events"
+    
+    user_roles ||--o{ user_events : "assigned in"
+    user_event_types ||--o{ user_events : "categorizes"
 
-  %% ドラフト削除(E)
-  draft_deletion_events {
-    varchar id PK
-    varchar article_id FK
-    varchar user_id FK
-    timestamp draft_deleted_date
-  }
-
-  %% ドラフト記事(R)
-  draft_articles {
-    varchar id PK
-    varchar title
-    varchar text
-    varchar article_id FK
-  }
-
-  %% 記事公開(E)
-  article_publication_events {
-    varchar id PK
-    varchar article_id FK
-    varchar user_id FK
-    timestamp published_date
-  }
-
-  %% 記事非公開(E)
-  article_unpublication_events {
-    varchar id PK
-    varchar article_id FK
-    varchar user_id FK
-    timestamp unpublished_date
-  }
-  
-  %% 公開記事(R)
-  published_articles {
-    varchar id PK
-    varchar title
-    varchar text
-    varchar article_id FK
-  }
-
-  %% 記事削除(E)
-  article_deletion_events {
-    varchar id PK
-    varchar article_id FK
-    varchar user_id FK
-    timestamp deleted_date
-  }
-
-  user_profiles }o--|| users: "belongs to"
-  user_profile_change_events }o--|| users: "changes"
-  user_profile_change_events }o--|| user_profiles: "creates"
-  user_self_registration_events }o--|| users: "has"
-  user_self_registration_events }o--|| user_profiles: "creates"
-  user_self_registration_events}o--||user_roles: "has"
-  user_role_assignment_events }o--||user_roles: "has"
-  user_withdrawal_events }o--|| users: "has"
-  user_role_assignment_events }o--|| users: "has"
-  user_forced_withdrawal_events }o--|| users: "has"
-  users ||--o{ draft_creation_events: "creates"
-  users ||--o{ draft_deletion_events: "deletes"
-  users ||--o{ article_publication_events: "publishes"
-  users ||--o{ article_unpublication_events: "unpublishes"
-  users ||--o{ article_deletion_events: "deletes"
-  articles ||--o{ draft_articles: "has"
-  articles ||--o{ published_articles: "has"
-  draft_creation_events }o--|| articles: "creates"
-  draft_deletion_events }o--|| articles: "deletes"
-  article_publication_events }o--|| articles: "publishes"
-  article_unpublication_events }o--|| articles: "unpublishes"
-  article_deletion_events }o--|| articles: "deletes"
+    users ||--o{ article_events : "performs"    
+    articles ||--o{ article_versions : "has versions"
+    articles ||--o{ article_events : "has events"
+    article_event_types ||--o{ article_events : "categorizes"
 ```
-
-
-

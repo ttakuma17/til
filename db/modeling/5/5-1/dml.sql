@@ -1,94 +1,69 @@
--- ユーザーロールは先に準備
-INSERT INTO user_roles (id, name) VALUES 
-    ('role-1', 'admin'),
-    ('role-2', 'general_user');
--- ユーザーテーブル
+INSERT INTO user_event_types (id, name) VALUES
+('user_event_type_1', 'REGISTER'),
+('user_event_type_2', 'UPDATE_PROFILE'),
+('user_event_type_3', 'ADD_ROLE'),
+('user_event_type_4', 'REMOVE_ROLE'),
+('user_event_type_5', 'WITHDRAW'),
+('user_event_type_6', 'FORCE_OUT');
+
+INSERT INTO user_roles (id, name) VALUES
+('user_role_1', 'GENERAL'),
+('user_role_2', 'ADMIN');
+
+INSERT INTO users (id) VALUES ('system');
+INSERT INTO user_profile_versions (id, user_id, version, name, email) 
+VALUES ('system-profile', 'system', 1, 'System', 'system@example.com');
+INSERT INTO user_events (
+    id, user_id, event_type_id, actor_user_id, version, role_id
+) VALUES (
+    'system-create', 'system', 'user_event_type_1', 'system', 1, 'user_role_2'
+);
+
+INSERT INTO article_event_types (id, name) VALUES
+('article_event_type1', 'CREATE'),
+('article_event_type2', 'VERSION'),
+('article_event_type3', 'PUBLISH'),
+('article_event_type4', 'UNPUBLISH'),
+('article_event_type5', 'DELETE');
+
 INSERT INTO users (id) VALUES
-    ('user-1'),
-    ('user-2'),
-    ('user-3'),
-    ('user-4'),
-    ('user-5'),
-    ('system');
+('user1'),
+('user2'),
+('admin1');
 
--- ユーザー情報テーブル
-INSERT INTO user_profiles (id, user_id, name, email) VALUES
-    ('profile-1', 'user-1', '山田太郎', 'yamada@example.com'),
-    ('profile-2', 'user-2', '佐藤花子', 'sato@example.com'),
-    ('profile-3', 'user-3', '鈴木一郎', 'suzuki@example.com'),
-    ('profile-4', 'user-4', '田中美咲', 'tanaka@example.com'),
-    ('profile-5', 'user-5', '伊藤健一', 'ito@example.com');
+INSERT INTO user_profile_versions (id, user_id, version, name, email) VALUES
+('profile1', 'user1', 1, '一般ユーザー1', 'user1@example.com'),
+('profile2', 'user2', 1, '一般ユーザー2', 'user2@example.com'),
+('profile3', 'admin1', 1, '管理者1', 'admin1@example.com');
 
--- ユーザーロール割当イベント
-INSERT INTO user_role_assignment_events (id, user_id, role_id, assigned_date) VALUES
-    ('role-assign-1', 'user-1', 'role-2', CURRENT_TIMESTAMP),
-    ('role-assign-2', 'user-2', 'role-2', CURRENT_TIMESTAMP),
-    ('role-assign-3', 'user-3', 'role-2', CURRENT_TIMESTAMP),
-    ('role-assign-4', 'user-4', 'role-2', CURRENT_TIMESTAMP),
-    ('role-assign-5', 'user-5', 'role-2', CURRENT_TIMESTAMP),
-    ('role-assign-6', 'system', 'role-1', CURRENT_TIMESTAMP);
+INSERT INTO user_events (id, user_id, event_type_id, actor_user_id, version, role_id) VALUES
+('user_event1', 'user1', 'user_event_type_1', 'system', 1, 'user_role_1'),
+('user_event2', 'user2', 'user_event_type_1', 'system', 1, 'user_role_1'),
+('user_event3', 'admin1', 'user_event_type_1', 'system', 1, 'user_role_1'), -- 管理者1の登録と権限付与イベント
+('user_event4', 'admin1', 'user_event_type_3', 'system', 1, 'user_role_2');
 
--- サインアップイベント
-INSERT INTO user_self_registration_events (id, user_id, role_id, user_profile_id, registered_date) VALUES
-    ('signup-1', 'user-1', 'role-2', 'profile-1', CURRENT_TIMESTAMP),
-    ('signup-2', 'user-2', 'role-2', 'profile-2', CURRENT_TIMESTAMP),
-    ('signup-3', 'user-3', 'role-2', 'profile-3', CURRENT_TIMESTAMP),
-    ('signup-4', 'user-4', 'role-2', 'profile-4', CURRENT_TIMESTAMP),
-    ('signup-5', 'user-5', 'role-2', 'profile-5', CURRENT_TIMESTAMP);
-
--- user1のprofileを変更して、変更イベントを記録
-INSERT INTO user_profiles (id, user_id, name, email) VALUES
-    ('profile-6', 'user-1', '山田次郎', 'yamada@example.com');
-INSERT INTO user_profile_change_events (id, user_id, user_profile_id, changed_date) VALUES
-    ('profile-change-1', 'user-1', 'profile-6', CURRENT_TIMESTAMP);
--- user3は退会したとして、ユーザー退会イベントを記録
-INSERT INTO user_withdrawal_events (id, user_id, withdrawn_date) VALUES
-    ('withdrawal-1', 'user-3', CURRENT_TIMESTAMP);
--- user4は強制的に退会したとして、ユーザー強制退会イベントを記録
-INSERT INTO user_forced_withdrawal_events (id, user_id, admin_user_id, reason, forced_withdrawn_date) VALUES
-    ('forced-withdrawal-1', 'user-4', 'system', '違反行為', CURRENT_TIMESTAMP);
--- 記事テーブル
 INSERT INTO articles (id) VALUES
-    ('article-1'),
-    ('article-2');
--- ドラフト作成イベントとドラフト記事リソースを記録
-INSERT INTO draft_creation_events (id, article_id, user_id, draft_created_date) VALUES
-    ('draft-creation-1', 'article-1', 'user-1', CURRENT_TIMESTAMP);
-INSERT INTO draft_articles (id, article_id, title, text) VALUES
-    ('draft-article-1', 'article-1', 'ドラフト記事1', 'ドラフト記事1の内容');
--- 作成したドラフト記事を公開するイベントと公開記事を記録
-INSERT INTO article_publication_events (id, article_id, user_id, published_date) VALUES
-    ('article-publication-1', 'article-1', 'user-1', CURRENT_TIMESTAMP);
-INSERT INTO published_articles (id, article_id, title, text) VALUES
-    ('published-article-1', 'article-1', '公開記事1', '公開記事1の内容');
--- 公開記事を非公開にするイベントを記録
-INSERT INTO article_unpublication_events (id, article_id, user_id, unpublished_date) VALUES
-    ('article-unpublication-1', 'article-1', 'user-1', CURRENT_TIMESTAMP);
--- 非公開記事を再公開するイベントを記録
-INSERT INTO article_publication_events (id, article_id, user_id, published_date) VALUES
-    ('article-publication-2', 'article-1', 'user-1', CURRENT_TIMESTAMP);
-INSERT INTO published_articles (id, article_id, title, text) VALUES
-    ('published-article-2', 'article-1', '公開記事1', '公開記事1の内容');
--- 公開記事を削除するイベントを記録
-INSERT INTO article_deletion_events (id, article_id, user_id, deleted_date) VALUES
-    ('article-deletion-1', 'article-1', 'user-1', CURRENT_TIMESTAMP);
--- ドラフト作成イベントとドラフト記事リソースを記録
-INSERT INTO draft_creation_events (id, article_id, user_id, draft_created_date) VALUES
-    ('draft-creation-2', 'article-2', 'user-2', CURRENT_TIMESTAMP);
-INSERT INTO draft_articles (id, article_id, title, text) VALUES
-    ('draft-article-2', 'article-2', 'ドラフト記事2', 'ドラフト記事2の内容');
--- 作成したドラフト記事を公開するイベントと公開記事を記録
-INSERT INTO article_publication_events (id, article_id, user_id) VALUES
-    ('article-publication-3', 'article-2', 'user-2');
-INSERT INTO published_articles (id, article_id, title, text) VALUES
-    ('published-article-3', 'article-2', '公開記事2', '公開記事2の内容');
+('article1'), -- 公開済み記事
+('article2'), -- 下書き記事
+('article3'); -- 削除済み記事
 
--- 公開済みの記事からドラフトを作成、公開するイベントを記録
-INSERT INTO draft_creation_events (id, article_id, user_id, draft_created_date) VALUES
-    ('draft-creation-3', 'article-2', 'user-2', CURRENT_TIMESTAMP);
-INSERT INTO draft_articles (id, article_id, title, text) VALUES
-    ('draft-article-3', 'article-2', 'ドラフト記事3', 'ドラフト記事3の内容 - 更新版');
-INSERT INTO article_publication_events (id, article_id, user_id) VALUES
-    ('article-publication-4', 'article-2', 'user-2');
-INSERT INTO published_articles (id, article_id, title, text) VALUES
-    ('published-article-4', 'article-2', '公開記事2 - 更新版', '公開記事2の内容 - 更新版');
+INSERT INTO article_versions (id, article_id, version, title, text, created_at) VALUES
+('version1', 'article1', 1, '最初の記事', '最初の記事の本文です。', '2024-03-14 10:00:00'),
+('version2', 'article1', 2, '最初の記事（更新済み）', '最初の記事の本文を更新しました。', '2024-03-14 11:00:00'),
+('version3', 'article2', 1, '下書き記事', '下書き記事の本文です。', '2024-03-14 12:00:00'),
+('version4', 'article3', 1, '削除予定の記事', '削除予定の記事の本文です。', '2024-03-14 13:00:00'),
+('version5', 'article3', 2, '削除予定の記事（更新済み）', '削除予定の記事の本文を更新しました。', '2024-03-14 14:00:00');
+
+INSERT INTO article_events (id, article_id, event_type_id, user_id, version, status, occurred_at) VALUES
+-- 記事1のイベント履歴
+('event1', 'article1', 'CREATE', 'user1', 1, 'draft', '2024-03-14 10:00:00'),
+('event2', 'article1', 'PUBLISH', 'user1', 1, 'published', '2024-03-14 10:30:00'),
+('event3', 'article1', 'VERSION', 'user1', 2, 'draft', '2024-03-14 11:00:00'),
+('event4', 'article1', 'PUBLISH', 'user1', 2, 'published', '2024-03-14 11:30:00'),
+('event5', 'article2', 'CREATE', 'user2', 1, 'draft', '2024-03-14 12:00:00'),
+('event6', 'article3', 'CREATE', 'user1', 1, 'draft', '2024-03-14 13:00:00'),
+('event7', 'article3', 'PUBLISH', 'user1', 1, 'published', '2024-03-14 13:30:00'),
+('event8', 'article3', 'VERSION', 'user1', 2, 'draft', '2024-03-14 14:00:00'),
+('event9', 'article3', 'PUBLISH', 'user1', 2, 'published', '2024-03-14 14:30:00'),
+('event10', 'article3', 'DELETE', 'admin1', 2, 'deleted', '2024-03-14 15:00:00');
+

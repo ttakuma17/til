@@ -1,173 +1,97 @@
--- ユーザーテーブル(R)
-CREATE TABLE users (
-    id VARCHAR(36) PRIMARY KEY
-);
-
--- ユーザー情報テーブル(R)
-CREATE TABLE user_profiles (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- ユーザー情報変更イベント(E)
-CREATE TABLE user_profile_change_events (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    user_profile_id VARCHAR(36) NOT NULL,
-    changed_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (user_profile_id) REFERENCES user_profiles(id)
-);
-
--- ユーザーロールテーブル(R)
-CREATE TABLE user_roles (
-    id VARCHAR(36) PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
-
--- サインアップイベント(E)
-CREATE TABLE user_self_registration_events (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    role_id VARCHAR(36) NOT NULL,
-    user_profile_id VARCHAR(36) NOT NULL,
-    registered_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (role_id) REFERENCES user_roles(id),
-    FOREIGN KEY (user_profile_id) REFERENCES user_profiles(id)
-);
-
--- ユーザーロール割り当てイベント(E)
-CREATE TABLE user_role_assignment_events (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    role_id VARCHAR(36) NOT NULL,
-    assigned_by_user_id VARCHAR(36) NOT NULL DEFAULT 'system',
-    assigned_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (role_id) REFERENCES user_roles(id),
-    FOREIGN KEY (assigned_by_user_id) REFERENCES users(id)
-);
-
--- ユーザー退会イベント(E)
-CREATE TABLE user_withdrawal_events (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    withdrawn_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- ユーザー強制退会イベント(E)
-CREATE TABLE user_forced_withdrawal_events (
-    id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    admin_user_id VARCHAR(36) NOT NULL,
-    reason VARCHAR(1000) NOT NULL,
-    forced_withdrawn_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (admin_user_id) REFERENCES users(id)
-);
-
 -- 記事テーブル(R)
 CREATE TABLE articles (
     id VARCHAR(36) PRIMARY KEY
 );
 
--- ドラフト記事テーブル(R)
-CREATE TABLE draft_articles (
+-- 記事バージョンテーブル(R)
+CREATE TABLE article_versions (
     id VARCHAR(36) PRIMARY KEY,
     article_id VARCHAR(36) NOT NULL,
+    version INT NOT NULL,
     title VARCHAR(255) NOT NULL,
     text TEXT NOT NULL,
-    FOREIGN KEY (article_id) REFERENCES articles(id)
-);
-
--- 公開記事テーブル(R)
-CREATE TABLE published_articles (
-    id VARCHAR(36) PRIMARY KEY,
-    article_id VARCHAR(36) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    text TEXT NOT NULL,
-    FOREIGN KEY (article_id) REFERENCES articles(id)
-);
-
--- ドラフト作成イベント(E)
-CREATE TABLE draft_creation_events (
-    id VARCHAR(36) PRIMARY KEY,
-    article_id VARCHAR(36) NOT NULL,
-    user_id VARCHAR(36) NOT NULL,
-    draft_created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,-- Resourceテーブルだがcreated_atをつけることにした。Versionがいつつくられたかがわかるように、ただしEventテーブルとJOINすればわかるのもある
     FOREIGN KEY (article_id) REFERENCES articles(id),
+    UNIQUE (article_id, version)
+);
+
+-- 記事イベントタイプ(R)
+CREATE TABLE article_event_types (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+
+-- ユーザーテーブル(R)
+CREATE TABLE users (
+    id VARCHAR(36) PRIMARY KEY
+);
+
+-- 記事イベント(E)
+CREATE TABLE article_events (
+    id VARCHAR(36) PRIMARY KEY,
+    article_id VARCHAR(36) NOT NULL,
+    event_type_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    version INT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (article_id) REFERENCES articles(id),
+    FOREIGN KEY (event_type_id) REFERENCES article_event_types(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- ドラフト削除イベント(E)
-CREATE TABLE draft_deletion_events (
+-- ユーザープロフィールバージョン(R)
+CREATE TABLE user_profile_versions (
     id VARCHAR(36) PRIMARY KEY,
-    article_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
-    draft_deleted_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (article_id) REFERENCES articles(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    version INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Resourceテーブルだがcreated_atをつけることにした。Versionがいつつくられたかがわかるように、ただしEventテーブルとJOINすればわかるのもある
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE (user_id, version)
 );
 
--- 記事公開イベント(E)
-CREATE TABLE article_publication_events (
+-- ユーザーロール(R)
+CREATE TABLE user_roles (
     id VARCHAR(36) PRIMARY KEY,
-    article_id VARCHAR(36) NOT NULL,
-    user_id VARCHAR(36) NOT NULL,
-    published_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (article_id) REFERENCES articles(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- 記事非公開イベント(E)
-CREATE TABLE article_unpublication_events (
+-- ユーザーイベントタイプ(R)
+CREATE TABLE user_event_types (
     id VARCHAR(36) PRIMARY KEY,
-    article_id VARCHAR(36) NOT NULL,
-    user_id VARCHAR(36) NOT NULL,
-    unpublished_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (article_id) REFERENCES articles(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- 記事削除イベント(E)
-CREATE TABLE article_deletion_events (
+-- ユーザーイベント(E)
+CREATE TABLE user_events (
     id VARCHAR(36) PRIMARY KEY,
-    article_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
-    deleted_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (article_id) REFERENCES articles(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    event_type_id VARCHAR(36) NOT NULL,
+    actor_user_id VARCHAR(36) NOT NULL,
+    version INT NOT NULL,
+    role_id VARCHAR(36),  -- ロール関連イベントのみで使用するため、このカラムだけはNULLを許容、デフォルト値いれとくでもいい気はする
+    occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (event_type_id) REFERENCES user_event_types(id),
+    FOREIGN KEY (actor_user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES user_roles(id)
 );
 
--- インデックスの作成
-CREATE INDEX idx_user_self_registration_events_user_id ON user_self_registration_events(user_id);
-CREATE INDEX idx_user_self_registration_events_role_id ON user_self_registration_events(role_id);
-CREATE INDEX idx_user_role_assignment_events_user_id ON user_role_assignment_events(user_id);
-CREATE INDEX idx_user_role_assignment_events_role_id ON user_role_assignment_events(role_id);
-CREATE INDEX idx_user_withdrawal_events_user_id ON user_withdrawal_events(user_id);
-CREATE INDEX idx_user_forced_withdrawal_events_user_id ON user_forced_withdrawal_events(user_id);
-CREATE INDEX idx_draft_articles_article_id ON draft_articles(article_id);
-CREATE INDEX idx_published_articles_article_id ON published_articles(article_id);
-CREATE INDEX idx_draft_creation_events_article_id ON draft_creation_events(article_id);
-CREATE INDEX idx_draft_creation_events_user_id ON draft_creation_events(user_id);
-CREATE INDEX idx_draft_deletion_events_article_id ON draft_deletion_events(article_id);
-CREATE INDEX idx_draft_deletion_events_user_id ON draft_deletion_events(user_id);
-CREATE INDEX idx_article_publication_events_article_id ON article_publication_events(article_id);
-CREATE INDEX idx_article_publication_events_user_id ON article_publication_events(user_id);
-CREATE INDEX idx_article_unpublication_events_article_id ON article_unpublication_events(article_id);
-CREATE INDEX idx_article_unpublication_events_user_id ON article_unpublication_events(user_id);
-CREATE INDEX idx_article_deletion_events_article_id ON article_deletion_events(article_id);
-CREATE INDEX idx_article_deletion_events_user_id ON article_deletion_events(user_id);
-CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
-CREATE INDEX idx_user_profiles_email ON user_profiles(email);
-CREATE INDEX idx_user_profile_change_events_user_id ON user_profile_change_events(user_id);
-CREATE INDEX idx_user_profile_change_events_profile_id ON user_profile_change_events(user_profile_id);
-CREATE INDEX idx_user_profile_change_events_date ON user_profile_change_events(changed_date);
-CREATE INDEX idx_user_self_registration_events_profile_id ON user_self_registration_events(user_profile_id);
-CREATE INDEX idx_published_articles_title ON published_articles(title);
-CREATE INDEX idx_draft_articles_title ON draft_articles(title);
+CREATE INDEX idx_article_versions_article_id ON article_versions(article_id);
+CREATE INDEX idx_article_versions_version ON article_versions(version);
+CREATE INDEX idx_article_events_article_id ON article_events(article_id);
+CREATE INDEX idx_article_events_type ON article_events(event_type_id);
+CREATE INDEX idx_article_events_user_id ON article_events(user_id);
+CREATE INDEX idx_article_events_occurred_at ON article_events(occurred_at);
+CREATE INDEX idx_user_profile_versions_user_id ON user_profile_versions(user_id);
+CREATE INDEX idx_user_profile_versions_version ON user_profile_versions(version);
+CREATE INDEX idx_user_profile_versions_email ON user_profile_versions(email);
+CREATE INDEX idx_user_events_user_id ON user_events(user_id);
+CREATE INDEX idx_user_events_type ON user_events(event_type_id);
+CREATE INDEX idx_user_events_actor ON user_events(actor_user_id);
+CREATE INDEX idx_user_events_occurred_at ON user_events(occurred_at);
+
+
