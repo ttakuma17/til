@@ -69,7 +69,7 @@ CREATE TABLE user_events (
     user_id VARCHAR(36) NOT NULL,
     event_type_id VARCHAR(36) NOT NULL,
     actor_user_id VARCHAR(36) NOT NULL,
-    role_id VARCHAR(36),  -- ロール関連イベントのみで使用するため、このカラムだけはNULLを許容、デフォルト値いれとくでもいい気はする
+    role_id VARCHAR(36),
     occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (event_type_id) REFERENCES user_event_types(id),

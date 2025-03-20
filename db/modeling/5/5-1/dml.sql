@@ -10,7 +10,6 @@ INSERT INTO user_roles (id, name) VALUES
 ('user_role_1', 'GENERAL'),
 ('user_role_2', 'ADMIN');
 
--- TODO これいるんか？
 INSERT INTO users (id) VALUES ('system');
 INSERT INTO user_profile_versions (id, user_id, version, name, email) 
 VALUES ('system-profile', 'system', 1, 'System', 'system@example.com');
@@ -40,7 +39,7 @@ INSERT INTO user_profile_versions (id, user_id, version, name, email) VALUES
 INSERT INTO user_events (id, user_id, event_type_id, actor_user_id, role_id) VALUES
 ('user_event1', 'user1', 'user_event_type_1', 'system', 'user_role_1'),
 ('user_event2', 'user2', 'user_event_type_1', 'system', 'user_role_1'),
-('user_event3', 'admin1', 'user_event_type_1', 'system', 'user_role_1'), -- 管理者1の登録と権限付与イベント
+('user_event3', 'admin1', 'user_event_type_1', 'system', 'user_role_1'),
 ('user_event4', 'admin1', 'user_event_type_3', 'system', 'user_role_2');
 
 INSERT INTO articles (id) VALUES
