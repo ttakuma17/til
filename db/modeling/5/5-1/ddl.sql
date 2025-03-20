@@ -33,8 +33,6 @@ CREATE TABLE article_events (
     article_id VARCHAR(36) NOT NULL,
     event_type_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
-    version INT NOT NULL,
-    status VARCHAR(50) NOT NULL,
     occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (article_id) REFERENCES articles(id),
     FOREIGN KEY (event_type_id) REFERENCES article_event_types(id),
@@ -71,7 +69,6 @@ CREATE TABLE user_events (
     user_id VARCHAR(36) NOT NULL,
     event_type_id VARCHAR(36) NOT NULL,
     actor_user_id VARCHAR(36) NOT NULL,
-    version INT NOT NULL,
     role_id VARCHAR(36),  -- ロール関連イベントのみで使用するため、このカラムだけはNULLを許容、デフォルト値いれとくでもいい気はする
     occurred_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
@@ -93,5 +90,3 @@ CREATE INDEX idx_user_events_user_id ON user_events(user_id);
 CREATE INDEX idx_user_events_type ON user_events(event_type_id);
 CREATE INDEX idx_user_events_actor ON user_events(actor_user_id);
 CREATE INDEX idx_user_events_occurred_at ON user_events(occurred_at);
-
-
