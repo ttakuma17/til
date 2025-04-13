@@ -1,8 +1,8 @@
 ### アンチパターンと初回のDB設計で微妙だったところを見直し
 
-- 無駄にidが多くなっているのでidの採番を見直す
-- Fractional Indexingとかつかって順番管理ちゃんとできるようにする
-- statusフラグどうにかなりませんか？
+- そもそも履歴管理したいもんでもないので更新前提で設計し直す
+  - すべてのテーブルにidが2つあっていびつな形になっていたのを修正
+- スレッドメッセージの順序管理を整数値でやっていたが、その場合すべてのレコードを変える必要があるが、timestampで順序管理は可能なのでカラム自体削除した
 
 ### ERD
 
@@ -14,77 +14,53 @@ erDiagram
   %% ユーザー(R)
   users {
     int id PK
-    varchar user_uuid
     varchar name
     varchar email
     timestamp created_at
+    timestamp updated_at
   }
-  %% ワークスペース(R) 
+  %% ワークスペース(R)
   workspaces {
     int id PK
-    varchar workspace_uuid
     varchar name
     timestamp created_at
+    timestamp updated_at 
   }
   %% チャンネル(R)
-  channels {
+  channels { 
     int id PK
-    varchar channel_uuid
     varchar name
-    varchar workspace_uuid FK
+    varchar workspace_id FK
     timestamp created_at
-  }
-  %% ワークスペースイベント(E)
-  workspace_events {
-    int id PK
-    varchar status
-    varchar user_uuid FK
-    int workspace_id FK
-    timestamp created_at
-  }
-  %% チャンネルイベント(E)
-  channel_events {
-    int id PK
-    varchar status
-    varchar user_uuid FK
-    int channel_id FK
-    timestamp created_at
+    timestamp updated_at
   }
   %% 投稿(E)
   posts {
     int id PK
-    varchar post_uuid
-    varchar status
-    varchar user_uuid FK
-    varchar message_uuid FK
-    varchar channel_uuid FK
-    timestamp posted_at
+    int user_id FK
+    int message_id FK
+    int channel_id FK
+    timestamp created_at
   }
   %% メッセージ(R)
   messages {
     int id PK
-    varchar message_uuid
     varchar content
     varchar type
     timestamp created_at
+    timestamp updated_at
   }
   %% スレッドメッセージ(R)
   thread_messages {
     int id PK
-    varchar thread_message_uuid
-    int post_order
-    varchar parent_message_uuid FK
-    varchar message_uuid FK
+    int parent_message_id FK
+    int message_id FK
     timestamp created_at
+    timestamp updated_at
   }
-        
-  users ||--o{ workspace_events: "creates"
-  users ||--o{ channel_events: "creates"
-  users ||--o{ posts: "creates"
-  channels }| -- || workspaces: "belongs to"
-  posts ||--|{ channels: "has"
-  posts ||--|{ messages: "has"
-  messages ||--o{ thread_messages: "has"
-  workspace_events }|--|| workspaces: "has"
-  channel_events }|--|| channels: "has"
+  channels }| -- || workspaces: ""
+  users ||--o{ posts: ""
+  posts ||--|{ channels: ""
+  posts ||--|{ messages: ""
+  messages ||--o{ thread_messages: ""
 ```
