@@ -66,14 +66,14 @@ erDiagram
     }
 
     %% リレーションシップ
-    users ||--o{ user_profile_versions : "has versions"
-    users ||--o{ user_events : "has events"
+    users ||--o{ user_profile_versions : ""
+    users ||--o{ user_events : ""
     
-    user_roles ||--o{ user_events : "assigned in"
+    user_roles ||--o{ user_events : ""
 
-    users ||--o{ article_events : "performs"    
-    articles ||--o{ article_versions : "has versions"
-    articles ||--o{ article_events : "has events"
+    users ||--o{ article_events : ""
+    articles ||--o{ article_versions : ""
+    articles ||--o{ article_events : ""
 ```
 
 変更点
