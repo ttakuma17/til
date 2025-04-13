@@ -1,13 +1,17 @@
 ### アンチパターンと初回のDB設計で微妙だったところを見直し
 
+変更点
+- event_typeテーブルの削除
+- 世代バージョンタグ付けパターンでどのバージョンに戻したかをおえるようにする
 
+```mermaid
 ---
-title: ブログサービス
+title: ブログサービス (5-1)
 ---
 erDiagram
-users {
-varchar(36) id PK
-}
+    users {
+        varchar(36) id PK
+    }
 
     user_profile_versions {
         varchar(36) id PK
@@ -23,15 +27,10 @@ varchar(36) id PK
         varchar(50) name
     }
 
-    user_event_types {
-        varchar(10) id PK
-        varchar(50) name
-    }
-
     user_events {
         varchar(36) id PK
+        varchar(10) event_type
         varchar(36) user_id FK
-        varchar(10) event_type_id FK
         varchar(36) actor_user_id FK
         varchar(36) role_id FK
         varchar(1000) reason
@@ -40,6 +39,11 @@ varchar(36) id PK
 
     articles {
         varchar(36) id PK
+    }
+    
+    active_articles {
+        varchar(36) article_id FK
+        varchar(36) article_version_id FK
     }
 
     article_versions {
@@ -51,15 +55,10 @@ varchar(36) id PK
         timestamp created_at
     }
 
-    article_event_types {
-        varchar(10) id PK
-        varchar(50) name
-    }
-
     article_events {
         varchar(36) id PK
+        varchar(10) event_type
         varchar(36) article_id FK
-        varchar(10) event_type_id FK
         varchar(36) user_id FK
         varchar(50) status
         varchar(50) status
@@ -71,10 +70,41 @@ varchar(36) id PK
     users ||--o{ user_events : "has events"
     
     user_roles ||--o{ user_events : "assigned in"
-    user_event_types ||--o{ user_events : "categorizes"
 
     users ||--o{ article_events : "performs"    
     articles ||--o{ article_versions : "has versions"
     articles ||--o{ article_events : "has events"
-    article_event_types ||--o{ article_events : "categorizes"
+```
+
+変更点
+- resultテーブル不要なので削除した。
+　- resultテーブルは外部にAPI叩いた結果をもとに判定するなどであれば必要だが、今回は自身のアプリケーションに閉じるため不要
+- トランザクション管理しない理由
+  - どちらも登録できてたら問題なし。article_register_startで失敗したら、最初からやり直し。
+article_transactionに失敗したら、article_startの登録だけなので記事の内容自体がないので使えない。
+
+```mermaid
+---
+title: ブログサービス (5-2)
+---
+erDiagram
+  %% 記事登録開始(E)
+  article_register_start {
+    varchar article_event_start_id PK
+    varchar article_id
+    datetime created_at
+  }
+
+  %% 記事トランザクション(E)
+  article_transaction {
+    varchar article_transaction_id PK
+    varchar article_id FK
+    varchar title
+    varchar content
+    varchar status
+    integer version
+    datetime created_at
+  }
+
+  article_register_start o|--|{ article_transaction: "has"
 ```
