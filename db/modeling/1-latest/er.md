@@ -1,10 +1,5 @@
 ### アンチパターンと初回のDB設計で微妙だったところを見直し
 
-- セット商品の扱い
-- キャンペーンとクーポンの扱いをわける
-- Event と Resourceの扱い
-- paidフラグ
-
 変更点
 - customersに関しては会員管理する必要がないので
 - orders から paidを除去して別で状態を管理する
@@ -32,6 +27,7 @@ erDiagram
         int id PK
         int order_id FK
         int subtotal
+        int discount
         int tax_amount
         int total
         timestamp created_at
@@ -58,15 +54,15 @@ erDiagram
         timestamp updated_at
     }
     menu_prices {
-        int id PL
+        int id PK
         int menu_id FK
         int unit_price
         timestamp created_at
     }
     set_menus_detail {
         int id PK
-        set_menu_id FK
-        menu_id FK
+        int set_menu_id FK
+        int menu_id FK
         timestamp created_at
         timestamp updated_at
     }
@@ -88,7 +84,7 @@ erDiagram
     }
     option_values {
         int id PK
-        option_type_id FK
+        int option_type_id FK
         varchar option_value
         timestamp created_at
         timestamp updated_at
@@ -101,14 +97,54 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    campaigns {
+        int id PK
+        varchar name
+        timestamp created_at
+    }
+    campaign_application {
+        int id PK
+        int order_id FK
+        int campaign_id FK
+        int applied_at
+    }
+    campaign_status {
+        int id PK
+        int campaign_id FK
+        varchar status
+        timestamp created_at
+    }
+    campaign_schedule {
+        int id PK
+        int campaign_id FK
+        timestamp start_at
+        timestamp end_at
+        timestamp created_at
+    }
+    campaign_discounts {
+        int id PK
+        int campaign_id FK
+        int discount_type
+        int discount_amount
+        timestamp created_at
+    }
     
     customers ||--o{ orders: ""
     orders ||--|{ order_details: ""
     orders ||--|{ order_totals: ""
-    orders ||--|| order_payment_status: ""
+    orders ||--|{ order_payment_status: ""
     order_details ||--|| menus: ""
     order_details ||--o{ order_detail_options: ""
     menus }|--|| menu_categories: ""
+    menus ||--|{ menu_prices: ""
+    menus ||--|{ set_menus_detail: ""
+    menus ||--o{ menu_available_options: ""
+    menu_available_options }o--|| option_types: ""
     order_detail_options }o--|| option_types: ""
     order_detail_options }o--|| option_values: ""
+    campaign_application }|--|| campaigns: ""
+    campaigns ||--|{ campaign_status: ""
+    campaigns ||--|{ campaign_schedule: ""
+    campaigns ||--|{ campaign_discounts: ""
+    orders ||--o{ campaign_application: ""
 ```
