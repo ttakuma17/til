@@ -1,10 +1,7 @@
 ### アンチパターンと初回のDB設計で微妙だったところを見直し
 
-- doneフラグ
-- idの採番を見直す。clientsとrecepintsいる？とか
-- interval types はEAV
-
 変更点
+- タスクの完了をフラグで管理していたのをテーブル分割で対応
 - clientとrepresentativeテーブルは不要なので削除しました
 
 
@@ -40,7 +37,7 @@ erDiagram
   %% リマインド間隔設定(R)
   interval_types {
     int id PK
-    varchar name 
+    varchar name
     timestamp created_at
   }
   %% リマインド間隔タイプ(R)
