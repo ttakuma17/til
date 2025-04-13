@@ -1,18 +1,19 @@
 ### アンチパターンと初回のDB設計で微妙だったところを見直し
 
-- データモデルとしての不整合が起きてるところを治す
-- Fractional Indexingに対応する
+- usersテーブルは課題の主となるテーブルではないので最低限のものとする
+- writesが依存するのはusersとdocumentsだけにさせた。当初はdirectoriesも入れてたが、documentsテーブルでdirectoryの情報をもつようにした
+- ドキュメントの履歴管理には世代バージョンタグ付けパターンで表現し直す
+  - すべてのバージョンをデータとして持っておいて、ポインタ/タグでどれをアクティブなものとするかをきめるパターン
+- ディレクトリの構造管理は閉包テーブルで表現する
+  - ancestor_idとdescendant_idには自身を含んですべての親子関係を保持させる
+- ディレクトリ内の順番管理にはFractional Indexingをつかって管理する
+  - document_positionsテーブルのpositionを文字列として扱い順番を入れ替えたいところだけを触れば成立させる
 
 ```mermaid
 ---
 title: ドキュメント管理システム
 ---
 erDiagram
-    user_statuses {
-        serial user_id FK
-        varchar status
-        timestamp created_at
-    }
     users {
         serial id PK
         varchar name
@@ -22,53 +23,50 @@ erDiagram
     writes {
         serial id PK
         int user_id FK
-        int directory_id FK 
         int document_id FK
         timestamp created_at
-        timestamp updated_at
     }
-    write_statuses {
-        int write_id FK
-        int user_id FK
-        varchar status
-        timestamp created_at
-    }
+    
     documents {
-        serial id PK
-        varchar title
-        text content
+        serial document_id PK
+        int directory_id FK
         timestamp created_at
         timestamp updated_at
     }
-    document_histories {
-        serial document_id FK
+    document_versions {
+        serial id PK
+        int document_id FK
         varchar title
         text content
         timestamp created_at
     }
-    document_order {
+    active_documents {
+        int document_id FK
+        int document_version_id FK
+    }
+    document_positions {
         int directory_id FK
         int document_id FK
-        int position
+        varchar position
     }
     directories {
         serial id PK
         varchar name
         timestamp created_at
-        timestamp updated_at
     }
     directory_paths {
-        int parent_id
-        int child_id
+        int ancestor_id
+        int descendant_id
     }
     
-    users ||--o{ writes: "creates"
-    users ||--|{ user_statuses: "creates"
-    writes }o--|| documents: "has"
-    writes }o--|| directories: "has"
-    writes ||--|{ write_statuses: "creates"
-    directories ||--|{ directory_paths: "has"
-    documents ||--|{ document_histories: "creates"
-    documents_order ||--|{ documents: "has"
-    documents_order ||--|{ directories: "has"
+    users ||--o{ writes: ""
+    writes }o--|| documents: ""
+    documents ||--|{ document_versions: ""
+    active_documents }|--|| document_versions: ""
+    documents }|--|| directories: ""
+    directories ||--|{ directory_paths: ""
+    directory_paths }|--|| directories: ""
+    documents ||--|{ document_positions: ""
+    directories ||--|{ document_positions: ""
+
 ```

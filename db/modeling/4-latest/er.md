@@ -1,39 +1,25 @@
 ### アンチパターンと初回のDB設計で微妙だったところを見直し
 
-
-- idの採番を見直す。clientsとrecepintsいる？とか
 - doneフラグ
+- idの採番を見直す。clientsとrecepintsいる？とか
 - interval types はEAV
-- 
+
+変更点
+- clientとrepresentativeテーブルは不要なので削除
 
 ```mermaid
 ---
 title: penpen
 ---
 erDiagram
-  %% 依頼者(R)
-  clients {
-    int id PK
-    varchar slackId
-    timestamp created_at
-    timestamp updated_at
-  }
   %% リマインド (E)
   reminds {
     int id PK
-    varchar content
     boolean done
-    int client_id FK
-    int representative_id FK
+    int slack_client_id FK
+    int slack_representative_id FK
     int task_id FK
     int interval_setting_id FK
-    timestamp created_at
-    timestamp updated_at
-  }
-  %% 担当者(R)
-  representatives {
-    int id PK
-    varchar slackId
     timestamp created_at
     timestamp updated_at
   }
@@ -61,8 +47,6 @@ erDiagram
     timestamp updated_at
   }
   
-  clients ||--o{ reminds: "creates"
-  reminds }|--|| representatives: "has"
   reminds }|--|| tasks: "has"
   reminds ||--|| interval_settings: "has"
   interval_settings }|--|| interval_types: "has"
