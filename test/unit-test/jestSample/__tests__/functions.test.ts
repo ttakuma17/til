@@ -1,5 +1,8 @@
 import {sumOfArray, asyncSumOfArray, asyncSumOfArraySometimesZero, getFirstNameThrowIfLong} from "../functions";
-import {INameApiService} from "../nameApiService";
+import {INameApiService, NameApiService} from "../nameApiService";
+import axios from "axios";
+import MockAdapter from "axios-mock-adapter";
+
 
 // 課題2-1
 describe("sumOfArray", () => {
@@ -68,3 +71,39 @@ describe("getFirstNameThrowIfLong", () => {
     })
   })
 });
+
+// 課題2-3
+describe("NameApiService", () => {
+  let nameApiService: NameApiService;
+  let mock: MockAdapter
+
+  beforeAll(() => {
+    mock = new MockAdapter(axios);
+    nameApiService = new NameApiService(axios, "https://example.com");
+  });
+
+  afterEach(() => {
+    mock.reset();
+  });
+
+  test("getFirstNameで200レスポンスを返す", () => {
+    mock.onGet("https://example.com").reply(200, {
+      first_name: "John"
+    });
+
+    return nameApiService.getFirstName().then((data) => {
+      expect(data).toBe("John");
+    })
+  })
+
+
+  test("firstNameがMax Length以上の場合は例外を返す", () => {
+    mock.onGet("https://example.com").reply(200, {
+      first_name: "Johnnnnnnnnnnn"
+    });
+
+    return nameApiService.getFirstName().catch((err) => {
+      expect(err.message).toBe("firstName is too long!");
+    })
+  })
+})
