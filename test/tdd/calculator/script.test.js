@@ -9,16 +9,16 @@ describe('Calculator', () => {
 
         it('引数が30個までは足し算できること', () => {
             const args = Array(30).fill(1)
-            expect(() => add(...args)).toBe(30)
+            expect(add(...args)).toBe(30)
         })
 
         it('引数が31個以上の場合は例外をはくこと', () => {
             const args = Array(31).fill(1)
-            expect(() => add(...args)).toThrow()
+            expect(() => add(...args)).toThrow('引数は30個までしか指定できません')
         })
 
         it('数値以外の値で足し算しようとすると例外をはくこと', () => {
-            expect(() => add(1, '2')).toThrow()
+            expect(() => add(1, '2')).toThrow('引数は数値である必要があります')
         })
 
         it('計算結果が1000を超えると too big を返すこと', () => {
@@ -31,12 +31,12 @@ describe('Calculator', () => {
             expect(subtract(5, 3)).toBe(2)
         })
 
-        it('引き算の結果が負の数になった場合はnegative numer を返すこと', () => {
+        it('引き算の結果が負の数になった場合はnegative number を返すこと', () => {
             expect(subtract(3, 5)).toBe('negative number')
         })
 
         it('数値以外の値で引き算しようとすると例外をはくこと', () => {
-            expect(() => subtract(1, '2')).toThrow()
+            expect(() => subtract(1, '2')).toThrow('引数は数値である必要があります')
         })
     })
 
@@ -50,7 +50,7 @@ describe('Calculator', () => {
         })
 
         it('数値以外の値で掛け算しようとすると例外をはくこと', () => {
-            expect(() => multiply(1, '2')).toThrow()
+            expect(() => multiply(1, '2')).toThrow('引数は数値である必要があります')
         })
     })
 
@@ -67,12 +67,12 @@ describe('Calculator', () => {
             expect(divide(10, 3)).toBe(3.3)
         })
 
-        it('数値以外の値で引き算しようとすると例外をはくこと', () => {
-            expect(() => divide(1, '2')).toThrow()
+        it('数値以外の値で割り算しようとすると例外をはくこと', () => {
+            expect(() => divide(1, '2')).toThrow('引数は数値である必要があります')
         })
 
         it('0で割り算をすると例外をはくこと', () => {
-            expect(() => divide(1, 0)).toThrow()
+            expect(() => divide(1, 0)).toThrow('0で割ることはできません')
         })
     })
 })
