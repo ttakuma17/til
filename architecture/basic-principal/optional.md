@@ -25,7 +25,106 @@
     - 機能的凝集
       - モジュール内の処理が1つの明確な目的・機能を達成するために構成されている。
       - e.g 「計算結果を求める関数」「ファイルを保存する関数」など。
-- 結合度(coupling)に関して
+```typescript
+// 1. 偶発的凝集の例（良くない例）
+class OrderProcessor {
+    processOrder(order: Order): void {
+        // ログ出力
+        console.log(`Processing order: ${order.id}`);
+        
+        // データ初期化
+        const orderData = this.initializeOrderData(order);
+        
+        // エラー処理
+        try {
+            this.validateOrder(order);
+        } catch (error) {
+            console.error('Order validation failed:', error);
+        }
+        
+        // 注文処理
+        this.saveOrder(orderData);
+    }
+}
+
+// 2. 論理的凝集の例（良くない例）
+class DocumentHandler {
+    handleDocument(document: Document, action: 'print' | 'save' | 'send'): void {
+        switch (action) {
+            case 'print':
+                this.printDocument(document);
+                break;
+            case 'save':
+                this.saveDocument(document);
+                break;
+            case 'send':
+                this.sendDocument(document);
+                break;
+        }
+    }
+}
+
+// 3. 時間的凝集の例（良くない例）
+class ApplicationInitializer {
+    initialize(): void {
+        this.initializeLogger();
+        this.loadConfiguration();
+        this.initializeUI();
+        this.setupDatabase();
+    }
+}
+
+// 4. 手続き的凝集の例（やや良くない例）
+class OrderValidationFlow {
+    validateOrder(order: Order): void {
+        this.validateInput(order);
+        this.checkInventory(order);
+        this.verifyPayment(order);
+        this.updateStock(order);
+    }
+}
+
+// 5. 通信的凝集の例（良い例）
+class ProductManager {
+    private product: Product;
+
+    constructor(product: Product) {
+        this.product = product;
+    }
+
+    updateStock(quantity: number): void {
+        this.product.stock = quantity;
+    }
+
+    updatePrice(price: number): void {
+        this.product.price = price;
+    }
+
+    updateDescription(description: string): void {
+        this.product.description = description;
+    }
+}
+
+// 6. 逐次的凝集の例（良い例）
+class OrderProcessor {
+    processOrder(order: Order): OrderResult {
+        const validatedOrder = this.validateOrder(order);
+        const processedOrder = this.processPayment(validatedOrder);
+        return this.generateInvoice(processedOrder);
+    }
+}
+
+// 7. 機能的凝集の例（最良の例）
+class PriceCalculator {
+    calculateTotalPrice(items: CartItem[]): number {
+        return items.reduce((total, item) => {
+            return total + (item.price * item.quantity);
+        }, 0);
+    }
+} 
+```
+
+結合度(coupling)に関して
     - 結合度は低いほど望ましく、変更の影響範囲が狭まり、柔軟性や再利用性が高くなる。
     - 用語の意味
         - モジュール間の依存関係の強さを示す指標。
@@ -50,3 +149,98 @@
     - メッセージ結合
       - モジュール間がメッセージ（イベントやコマンド）で疎結合に通信する。最も低い結合。モジュール独立性が高く、テストやスケーラビリティに優れる。
       - e.g オブジェクト指向やマイクロサービスでの非同期メッセージ送信。
+
+```typescript
+// 1. 内部結合の例（良くない例）
+class OrderProcessor {
+    private order: Order;
+    
+    processOrder(): void {
+        // 他クラスの内部実装に直接依存
+        const paymentProcessor = new PaymentProcessor();
+        paymentProcessor._processPayment(this.order); // プライベートメソッドに直接アクセス
+    }
+}
+
+// 2. 共通結合の例（良くない例）
+// グローバルな状態管理
+let globalOrderStatus: OrderStatus = 'pending';
+let globalInventory: Map<string, number> = new Map();
+
+class OrderManager {
+    updateOrderStatus(): void {
+        globalOrderStatus = 'processing';
+    }
+}
+
+class InventoryManager {
+    updateStock(): void {
+        globalInventory.set('product1', 100);
+    }
+}
+
+// 3. 外部結合の例（良くない例）
+class FileExporter {
+    exportToCSV(data: Order[]): void {
+        // 外部ファイル形式に強く依存
+        const csvContent = this.convertToCSVFormat(data);
+        fs.writeFileSync('orders.csv', csvContent, 'utf-8');
+    }
+}
+
+// 4. 制御結合の例（良くない例）
+class OrderHandler {
+    processOrder(order: Order, mode: 'normal' | 'express' | 'bulk'): void {
+        switch (mode) {
+            case 'normal':
+                this.processNormalOrder(order);
+                break;
+            case 'express':
+                this.processExpressOrder(order);
+                break;
+            case 'bulk':
+                this.processBulkOrder(order);
+                break;
+        }
+    }
+}
+
+// 5. スタンプ結合の例（良くない例）
+class OrderProcessor {
+    processOrder(order: Order): void {
+        // 巨大なOrderオブジェクト全体を受け取るが、実際に使うのは一部だけ
+        const orderId = order.id;
+        const totalAmount = order.calculateTotal();
+        // 他の多くのプロパティは使用しない
+    }
+}
+
+// 6. データ結合の例（良い例）
+class PriceCalculator {
+    calculateTotal(price: number, quantity: number): number {
+        return price * quantity;
+    }
+}
+
+// 7. メッセージ結合の例（最良の例）
+interface OrderEvent {
+    type: 'ORDER_CREATED' | 'ORDER_PAID' | 'ORDER_SHIPPED';
+    payload: any;
+}
+
+class OrderEventPublisher {
+    publish(event: OrderEvent): void {
+        // イベントを発行
+        eventBus.publish(event);
+    }
+}
+
+class OrderEventListener {
+    onOrderCreated(event: OrderEvent): void {
+        // イベントを処理
+        if (event.type === 'ORDER_CREATED') {
+            this.handleNewOrder(event.payload);
+        }
+    }
+}
+```
